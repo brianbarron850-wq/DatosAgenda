@@ -62,6 +62,9 @@
       </div>
       
       <div class="flex items-center gap-3">
+        <button onclick="abrirVistaDatos()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors border border-indigo-700 flex items-center gap-2 shadow-sm">
+          📊 Datos
+        </button>
         <button id="btnSincronizar" onclick="sincronizarDatos()" class="bg-black/30 hover:bg-black/40 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors border border-white/10 flex items-center gap-2">
           🔄 Sincronizar
         </button>
@@ -86,9 +89,6 @@
             </button>
             <button onclick="abrirVistaGeneralAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
               📊 Vista General
-            </button>
-            <button onclick="abrirVistaDatosAdmin()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
-              📈 Datos
             </button>
           </div>
         </div>
@@ -334,73 +334,21 @@
     </div>
   </div>
 
-  <div id="vistaDatosAdmin" class="hidden fixed inset-0 bg-slate-50 z-[110] overflow-auto flex flex-col">
-    <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+  <div id="vistaDatosContainer" class="hidden fixed inset-0 bg-slate-50 z-[115] overflow-auto flex flex-col">
+    <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-10">
       <div>
-         <h2 class="text-xl font-bold">Dashboard de Estadística General</h2>
-         <p class="text-xs text-indigo-200 mt-1">Consulta tus KPIs y modifica el rango de fechas para actualizar.</p>
+         <h2 class="text-xl font-bold">Vista de Datos y Estadísticas</h2>
+         <p class="text-xs text-slate-300 mt-1">Indicadores clave extraídos de la base de datos.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="sincronizarDatosEstaGral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-          🔄 Actualizar
-        </button>
-        <button onclick="cerrarVistaDatosAdmin()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-sm">
-           Volver a la Agenda
+        <button onclick="cerrarVistaDatos()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+           Cerrar Vista
         </button>
       </div>
     </div>
-    <div class="flex-1 p-6 overflow-auto bg-slate-100">
-      
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-8 flex flex-wrap gap-6 items-end relative z-10">
-          <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1 text-indigo-700">Fecha Inicial</label>
-              <input type="date" id="inputFechaD1" class="border border-indigo-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 bg-indigo-50">
-          </div>
-          <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1 text-indigo-700">Fecha Final</label>
-              <input type="date" id="inputFechaG1" class="border border-indigo-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 bg-indigo-50">
-          </div>
-          <button onclick="guardarFechasGral()" id="btnGuardarFechasGral" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md h-[38px]">
-              💾 Guardar Fechas
-          </button>
-      </div>
-      
-      <div class="mt-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-          <div class="bg-slate-800 px-4 py-3">
-             <h4 class="font-bold text-white uppercase tracking-wider text-sm">INSTALACIONES</h4>
-          </div>
-          <div class="overflow-x-auto bg-white">
-            <table class="w-full text-sm text-center">
-              <thead class="text-xs text-slate-600 bg-slate-100 border-b border-slate-200 uppercase">
-                <tr>
-                  <th class="px-3 py-3 border-r border-slate-200">Ins_Agendada</th>
-                  <th class="px-3 py-3 border-r border-slate-200">Ins_Realizada</th>
-                  <th class="px-3 py-3 border-r border-slate-200">Ins_No_Realizada</th>
-                  <th class="px-3 py-3 border-r border-slate-200">Ins_Reagendar</th>
-                  <th class="px-3 py-3 border-r border-slate-200">Cancelo</th>
-                  <th class="px-3 py-3 border-r border-slate-200">Ins_Si_Reagendo</th>
-                  <th class="px-3 py-3">Ins_No_Reagendo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="hover:bg-slate-50 transition-colors">
-                  <td id="td-ins-agendada" class="px-3 py-4 font-bold text-slate-800 border-r border-slate-200">-</td>
-                  <td id="td-ins-realizada" class="px-3 py-4 font-bold text-emerald-600 border-r border-slate-200">-</td>
-                  <td id="td-ins-no-realizada" class="px-3 py-4 font-bold text-rose-500 border-r border-slate-200">-</td>
-                  <td id="td-ins-reagendar" class="px-3 py-4 font-bold text-amber-500 border-r border-slate-200">-</td>
-                  <td id="td-cancelo" class="px-3 py-4 font-bold text-red-600 border-r border-slate-200">-</td>
-                  <td id="td-ins-si-reagendo" class="px-3 py-4 font-bold text-blue-600 border-r border-slate-200">-</td>
-                  <td id="td-ins-no-reagendo" class="px-3 py-4 font-bold text-slate-500">-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-      </div>
-      
-      <div id="cargandoDatosGral" class="text-center text-slate-500 py-10 font-bold">Cargando métricas del Dashboard...</div>
-      
-      <div id="dashboardEstaGral" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden mt-6">
-      </div>
+    <div class="flex-1 p-6 overflow-auto">
+      <div id="cargandoDatos" class="text-center text-slate-500 py-10 font-bold hidden">Recuperando tablas de datos...</div>
+      <div id="contenedorTablasDatos" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
     </div>
   </div>
 
@@ -408,7 +356,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbygZf7v4KKHaEWQzXwG0aHsR5h3xqmwuQ-lU7TynMdH8a9qUkmwe6hhYsPNct52jtsp/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbwRzoMIMK485jgqX64aGBb-EBlCGV8GTYIImwHClAfvmTWYT4fo5-w6ASQ64Kum3wv-/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -441,8 +389,7 @@
             eliminarRegistroAgenda: function(r, u) { this._call('eliminarRegistroAgenda', [r, u]); },
             renombrarCuadrillaBD: function(v, n) { this._call('renombrarCuadrillaBD', [v, n]); },
             obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); },
-            obtenerDatosEstaGral: function() { this._call('obtenerDatosEstaGral', []); },
-            actualizarFechasEstaGral: function(d1, g1) { this._call('actualizarFechasEstaGral', [d1, g1]); }
+            obtenerDatosEstadisticas: function() { this._call('obtenerDatosEstadisticas', []); }
           }
         }
       };
@@ -774,7 +721,7 @@
             badge.innerText = estado;
             badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
             if(estado === 'ACTIVO' || estado === 'INSTALADO') {
-                badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
+                badge.classList.add('bg-emerald-100', 'textemerald-800', 'border-emerald-300');
             } else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') {
                 badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
             } else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') {
@@ -1517,15 +1464,6 @@
       document.getElementById('vistaAdminFiltros').classList.remove('hidden');
       sincronizarVistaAdmin();
     }
-    function abrirVistaDatosAdmin() {
-      if (rolUsuario !== 'admin') return;
-      document.getElementById('vistaDatosAdmin').classList.remove('hidden');
-      sincronizarDatosEstaGral(); // Carga las tablas y gráficas automáticamente al abrir la vista
-    }
-
-    function cerrarVistaDatosAdmin() {
-      document.getElementById('vistaDatosAdmin').classList.add('hidden');
-    }
     
     function sincronizarVistaAdmin() {
       const btn = document.getElementById('btnSincronizarAdminFiltros');
@@ -1696,133 +1634,109 @@
     }
 
     // ==========================================
-    // FUNCIONES ESTADÍSTICA GENERAL (DASHBOARD)
+    // NUEVO: FUNCIONES VISTA DATOS Y TABLAS
     // ==========================================
-    
-    function sincronizarDatosEstaGral() {
-      document.getElementById('cargandoDatosGral').classList.remove('hidden');
-      document.getElementById('dashboardEstaGral').classList.add('hidden');
-      
-      google.script.run.withSuccessHandler(function(res) {
-        document.getElementById('cargandoDatosGral').classList.add('hidden');
-        if (res.status === 'success') {
-          renderizarDatosEstaGral(res.data);
-          document.getElementById('dashboardEstaGral').classList.remove('hidden');
+    function abrirVistaDatos() {
+        document.getElementById('vistaDatosContainer').classList.remove('hidden');
+        document.getElementById('cargandoDatos').classList.remove('hidden');
+        document.getElementById('contenedorTablasDatos').innerHTML = '';
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler(function(res) {
+                 document.getElementById('cargandoDatos').classList.add('hidden');
+                 if(res.status === 'success') {
+                    dibujarTablasDatos(res);
+                 } else {
+                    alert("Error obteniendo datos: " + res.message);
+                 }
+              })
+              .withFailureHandler(function(err) {
+                 document.getElementById('cargandoDatos').classList.add('hidden');
+                 alert("Error de conexión: " + err);
+              })
+              .obtenerDatosEstadisticas();
         } else {
-          alert("Error al cargar Esta_Gral: " + res.message);
+            alert("No hay conexión disponible para esta acción.");
         }
-      }).obtenerDatosEstaGral();
     }
 
-    function renderizarDatosEstaGral(data) {
-      const container = document.getElementById('dashboardEstaGral');
-      container.innerHTML = '';
-      
-      if(!data || data.length === 0) return;
-      
-      // Mapear los inputs de fechas (Fila 0, Columnas D[3] y G[6])
-      let row0 = data[0] || [];
-      document.getElementById('inputFechaD1').value = row0.length > 3 ? row0[3] : "";
-      document.getElementById('inputFechaG1').value = row0.length > 6 ? row0[6] : "";
+    function renderTable(title, headers, dataCols) {
+        let maxRows = 0;
+        dataCols.forEach(function(col) { if(col.length > maxRows) maxRows = col.length; });
 
-      // --- TABLA FIJA DE INSTALACIONES (Fila 4 de Google Sheets = Índice 3) ---
-      if (data.length > 3) {
-          let row4 = data[3] || [];
-          document.getElementById('td-ins-agendada').textContent = (row4[1] !== undefined && row4[1] !== "") ? row4[1] : "-";
-          document.getElementById('td-ins-realizada').textContent = (row4[2] !== undefined && row4[2] !== "") ? row4[2] : "-";
-          document.getElementById('td-ins-no-realizada').textContent = (row4[3] !== undefined && row4[3] !== "") ? row4[3] : "-";
-          document.getElementById('td-ins-reagendar').textContent = (row4[4] !== undefined && row4[4] !== "") ? row4[4] : "-";
-          document.getElementById('td-cancelo').textContent = (row4[5] !== undefined && row4[5] !== "") ? row4[5] : "-";
-          document.getElementById('td-ins-si-reagendo').textContent = (row4[6] !== undefined && row4[6] !== "") ? row4[6] : "-";
-          document.getElementById('td-ins-no-reagendo').textContent = (row4[7] !== undefined && row4[7] !== "") ? row4[7] : "-";
-      }
-
-      // Construcción Dinámica del Dashboard (Se omite la fila 4 para no duplicarla)
-      data.forEach((row, rowIndex) => {
-          if (rowIndex === 0) return; // Se salta la fila de fechas
-          if (rowIndex === 3) return; // Se salta la fila 4 (Ya usada en la tabla INSTALACIONES)
-          
-          let celdasLlenas = [];
-          for(let j = 0; j < row.length; j++) {
-              if (row[j] !== "" && row[j] !== null) {
-                  celdasLlenas.push({ idx: j, val: row[j] });
-              }
-          }
-          
-          if (celdasLlenas.length === 0) return; // Ignorar filas vacías
-          
-          // CASO 1: Formato "Etiqueta - Valor" (Ej. Col A = Título, Col B = Métrica)
-          if (celdasLlenas.length === 2 && celdasLlenas[0].idx === 0) {
-              let titulo = celdasLlenas[0].val;
-              let valor = celdasLlenas[1].val;
-              let esPorcentaje = valor.toString().includes('%');
-              let colorClase = esPorcentaje ? 'text-emerald-600' : 'text-indigo-700';
-              let badgeColor = esPorcentaje ? 'bg-emerald-50 border-emerald-100' : 'bg-indigo-50 border-indigo-100';
-              
-              container.innerHTML += `
-                  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-all hover:-translate-y-1">
-                      <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">${titulo}</h3>
-                      <div class="text-3xl font-black ${colorClase} ${badgeColor} self-start px-3 py-1 rounded-lg border">${valor}</div>
-                  </div>
-              `;
-          } 
-          // CASO 2: Filas con múltiples datos (Ej. Tabla horizontal)
-          else {
-              let titulo = row[0] !== "" ? row[0] : `Registro ${rowIndex}`;
-              let metricsHtml = '';
-              
-              let startIndex = row[0] !== "" ? 1 : 0;
-              for (let k = startIndex; k < celdasLlenas.length; k++) {
-                  let item = celdasLlenas[k];
-                  let cabecera = (data[0] && data[0][item.idx]) ? data[0][item.idx] : `Métrica ${item.idx + 1}`;
-                  let esPorcentaje = item.val.toString().includes('%');
-                  let colorClase = esPorcentaje ? 'text-emerald-600' : 'text-slate-800';
-                  
-                  metricsHtml += `
-                      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center">
-                          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">${cabecera}</div>
-                          <div class="text-xl font-black ${colorClase}">${item.val}</div>
-                      </div>
-                  `;
-              }
-              
-              container.innerHTML += `
-                  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 lg:col-span-3 hover:shadow-md transition-all">
-                      <h3 class="text-lg font-black text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-                          <span class="w-2 h-6 rounded-full bg-indigo-500 inline-block"></span> ${titulo}
-                      </h3>
-                      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                          ${metricsHtml}
-                      </div>
-                  </div>
-              `;
-          }
-      });
-    }
-
-    function guardarFechasGral() {
-      const btn = document.getElementById('btnGuardarFechasGral');
-      const d1 = document.getElementById('inputFechaD1').value;
-      const g1 = document.getElementById('inputFechaG1').value;
-      
-      btn.innerHTML = "⏳ Guardando...";
-      btn.disabled = true;
-
-      google.script.run.withSuccessHandler(function(res) {
-        btn.innerHTML = "💾 Guardar Fechas";
-        btn.disabled = false;
+        let html = '<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">';
+        html += '<div class="bg-indigo-50 border-b border-slate-200 px-4 py-3 font-bold text-indigo-800 text-sm">' + title + '</div>';
+        html += '<div class="overflow-x-auto"><table class="min-w-full text-center text-xs border-collapse">';
+        html += '<thead class="bg-slate-100 text-slate-700"><tr>';
         
-        if (res.status === 'success') {
-          alert("Las fechas se han actualizado correctamente en la pestaña Esta_Gral.");
-          sincronizarDatosEstaGral(); // Recargar para reflejar cambios y fórmulas calculadas
-        } else {
-          alert("Error guardando fechas: " + res.message);
+        headers.forEach(function(h) {
+            html += '<th class="px-2 py-2 border-b border-r border-slate-200 whitespace-nowrap">' + h + '</th>';
+        });
+        
+        html += '</tr></thead><tbody class="divide-y divide-slate-200">';
+
+        for (let i = 0; i < maxRows; i++) {
+            html += '<tr>';
+            for (let j = 0; j < headers.length; j++) {
+                let val = (dataCols[j] && dataCols[j][i] !== undefined) ? dataCols[j][i] : "";
+                html += '<td class="px-2 py-1.5 border-r border-slate-200 whitespace-nowrap text-slate-600">' + val + '</td>';
+            }
+            html += '</tr>';
         }
-      }).withFailureHandler(function(err) {
-        btn.innerHTML = "💾 Guardar Fechas";
-        btn.disabled = false;
-        alert("Error de conexión: " + err);
-      }).actualizarFechasEstaGral(d1, g1);
+        html += '</tbody></table></div></div>';
+        return html;
+    }
+
+    function dibujarTablasDatos(data) {
+        let container = document.getElementById('contenedorTablasDatos');
+        let html = "";
+
+        html += renderTable("Tabla 1: Instalaciones",
+            ["Ins_Agendada", "Ins_Realizada", "Ins_No_Realizada", "Ins_Reagendar", "Cancelo", "Ins_Si_Reagendo", "Ins_No_Reagendo"],
+            [data.tabla1.agendada, data.tabla1.realizada, data.tabla1.no_realizada, data.tabla1.reagendar, data.tabla1.cancelo, data.tabla1.si_reagendo, data.tabla1.no_reagendo]);
+
+        html += renderTable("Tabla 2: Paquetes",
+            ["30mb", "50mb", "Ins_Cortesias", "Reactivación DES", "Reactivación"],
+            [data.tabla2.mb30, data.tabla2.mb50, data.tabla2.cortesias, data.tabla2.react_des, data.tabla2.react]);
+
+        html += renderTable("Tabla 3: ¿Por qué medio se dio cuenta de nosotros?",
+            ["Amigo/familiar", "Facebook", "Radio", "Rotulados", "Otro", "No contesto", "Es cliente", "Pagina web", "Total"],
+            [data.tabla3.amigo, data.tabla3.facebook, data.tabla3.radio, data.tabla3.rotulados, data.tabla3.otro, data.tabla3.no_contesto, data.tabla3.es_cliente, data.tabla3.pagina_web, data.tabla3.total]);
+
+        html += renderTable("Tabla 4: Soportes",
+            ["Sop_Agendada", "Sop_Realizada", "Sop_No_Realizada", "Sop_Reagendo", "Sop_Reagendada", "Sop_Des", "Sop_Cancelo"],
+            [data.tabla4.agendada, data.tabla4.realizada, data.tabla4.no_realizada, data.tabla4.reagendo, data.tabla4.reagendada, data.tabla4.des, data.tabla4.cancelo]);
+
+        html += renderTable("Tabla 5: Motivos de soportes",
+            ["Malas capacidades", "Modelo de módem", "Intermitencia", "LAN intermitente", "Antena no genera conexión", "Mal servicio SOP", "Solicitado por el cliente", "Falla de equipos", "Repetidor", "Re-ubicación de equipos", "Antena mikrotik", "Antena suelta", "Generado por el cliente", "Error humano", "Total"],
+            [data.tabla5.malas_cap, data.tabla5.modem, data.tabla5.intermitencia, data.tabla5.lan, data.tabla5.antena, data.tabla5.mal_sop, data.tabla5.solicitado, data.tabla5.falla, data.tabla5.repetidor, data.tabla5.reub, data.tabla5.mikrotik, data.tabla5.suelta, data.tabla5.generado, data.tabla5.error, data.tabla5.total]);
+
+        html += renderTable("Tabla 6: Cambio de domicilio",
+            ["Cam_Dom_Agendada", "Cam_Dom_Realizada", "Cam_Dom_No_Realizada", "Cam_Dom_Reagendo", "Cam_Dom_Reagendada", "Cam_Dom_Null", "Cam_Dom_Cancelada"],
+            [data.tabla6.agendada, data.tabla6.realizada, data.tabla6.no_realizada, data.tabla6.reagendo, data.tabla6.reagendada, data.tabla6.null_val, data.tabla6.cancelada]);
+
+        html += renderTable("Tabla 7: Desinstalaciones",
+            ["Des_Agendada", "Des_Realizada", "Des_No_Realizada", "Des_Reagendo", "Des_Reagendada", "Des_Reac", "Des_Cancelada", "Equipos completos", "Solo antena", "Solo modem"],
+            [data.tabla7.agendada, data.tabla7.realizada, data.tabla7.no_realizada, data.tabla7.reagendo, data.tabla7.reagendada, data.tabla7.reac, data.tabla7.cancelada, data.tabla7.completos, data.tabla7.antena, data.tabla7.modem]);
+
+        html += renderTable("Tabla 8: Estatus cliente desinstalaciones",
+            ["Motivo", "Agendado", "Realizado", "%"],
+            [data.tabla8.motivo, data.tabla8.agendado, data.tabla8.realizado, data.tabla8.porc]);
+
+        html += renderTable("Tabla 9: Motivo desinstalación",
+            ["Ya no se utiliza", "Muchas Fallas", "Intermitencia", "Lento", "Mal servicio CAT", "Mal servicio SOP", "Cambio de domicilio", "Ya contrato otro", "No tiene para pagar", "Tiempo de espera en visitas", "Sin motivo", "Por facturas pendientes", "Cliente fallecio", "Vendio la casa", "Desocupa casa", "Ya no lo quiere", "Soporte/Desinstalacion", "Por precio", "Total"],
+            [data.tabla9.no_utiliza, data.tabla9.fallas, data.tabla9.intermitencia, data.tabla9.lento, data.tabla9.mal_cat, data.tabla9.mal_sop, data.tabla9.cambio, data.tabla9.contrato_otro, data.tabla9.no_pagar, data.tabla9.espera, data.tabla9.sin_motivo, data.tabla9.facturas, data.tabla9.fallecio, data.tabla9.vendio, data.tabla9.desocupa, data.tabla9.no_quiere, data.tabla9.sop_des, data.tabla9.precio, data.tabla9.total]);
+
+        html += renderTable("Tabla 10: Desinstalaciones año contratado",
+            ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027"],
+            [data.tabla10.y2017, data.tabla10.y2018, data.tabla10.y2019, data.tabla10.y2020, data.tabla10.y2021, data.tabla10.y2022, data.tabla10.y2023, data.tabla10.y2024, data.tabla10.y2025, data.tabla10.y2026, data.tabla10.y2027]);
+
+        container.innerHTML = html;
+    }
+    
+    function cerrarVistaDatos() {
+        document.getElementById('vistaDatosContainer').classList.add('hidden');
     }
   </script>
 <div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
