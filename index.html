@@ -335,11 +335,26 @@
   </div>
 
   <div id="vistaDatosContainer" class="hidden fixed inset-0 bg-slate-50 z-[115] overflow-auto flex flex-col">
-    <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-10">
+    <div class="bg-slate-800 text-white px-6 py-4 flex flex-wrap gap-4 justify-between items-center shadow-md sticky top-0 z-10">
       <div>
          <h2 class="text-xl font-bold">Vista de Datos y Estadísticas</h2>
-         <p class="text-xs text-slate-300 mt-1">Indicadores clave extraídos de la base de datos.</p>
+         <p class="text-xs text-slate-300 mt-1">Indicadores clave extraídos de la pestaña "Esta_Gral".</p>
       </div>
+      
+      <div class="flex flex-wrap items-center gap-3 bg-slate-700 p-2 rounded-lg border border-slate-600">
+         <div class="flex flex-col">
+           <label class="text-[10px] text-slate-300 font-bold uppercase">Desde (D1)</label>
+           <input type="date" id="inputFechaD1" class="text-slate-900 text-xs px-2 py-1 rounded w-32 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+         </div>
+         <div class="flex flex-col">
+           <label class="text-[10px] text-slate-300 font-bold uppercase">Hasta (G1)</label>
+           <input type="date" id="inputFechaG1" class="text-slate-900 text-xs px-2 py-1 rounded w-32 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+         </div>
+         <button onclick="actualizarFechasYTablas()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors self-end shadow-sm">
+           Aplicar Fechas
+         </button>
+      </div>
+
       <div class="flex items-center gap-3">
         <button onclick="cerrarVistaDatos()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
            Cerrar Vista
@@ -356,7 +371,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbwRzoMIMK485jgqX64aGBb-EBlCGV8GTYIImwHClAfvmTWYT4fo5-w6ASQ64Kum3wv-/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbzbwHAndhOrkFMbPKgWpAEClvjECjbhLcUZCkMl8Kpa0rU-dzodEDHa52zqqYgcPUsu/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -389,7 +404,8 @@
             eliminarRegistroAgenda: function(r, u) { this._call('eliminarRegistroAgenda', [r, u]); },
             renombrarCuadrillaBD: function(v, n) { this._call('renombrarCuadrillaBD', [v, n]); },
             obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); },
-            obtenerDatosEstadisticas: function() { this._call('obtenerDatosEstadisticas', []); }
+            obtenerDatosEstadisticas: function() { this._call('obtenerDatosEstadisticas', []); },
+            actualizarFechasEstadisticas: function(d1, g1) { this._call('actualizarFechasEstadisticas', [d1, g1]); }
           }
         }
       };
@@ -721,7 +737,7 @@
             badge.innerText = estado;
             badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
             if(estado === 'ACTIVO' || estado === 'INSTALADO') {
-                badge.classList.add('bg-emerald-100', 'textemerald-800', 'border-emerald-300');
+                badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
             } else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') {
                 badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
             } else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') {
@@ -1634,7 +1650,7 @@
     }
 
     // ==========================================
-    // NUEVO: FUNCIONES VISTA DATOS Y TABLAS
+    // NUEVO: FUNCIONES VISTA DATOS Y TABLAS (CON FECHAS)
     // ==========================================
     function abrirVistaDatos() {
         document.getElementById('vistaDatosContainer').classList.remove('hidden');
@@ -1658,6 +1674,34 @@
               .obtenerDatosEstadisticas();
         } else {
             alert("No hay conexión disponible para esta acción.");
+        }
+    }
+
+    function actualizarFechasYTablas() {
+        var d1 = document.getElementById('inputFechaD1').value;
+        var g1 = document.getElementById('inputFechaG1').value;
+        
+        document.getElementById('cargandoDatos').classList.remove('hidden');
+        document.getElementById('cargandoDatos').innerText = "Guardando fechas y procesando datos...";
+        document.getElementById('contenedorTablasDatos').innerHTML = '';
+        
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler(function(res) {
+                 document.getElementById('cargandoDatos').classList.add('hidden');
+                 document.getElementById('cargandoDatos').innerText = "Recuperando tablas de datos...";
+                 if(res.status === 'success') {
+                    dibujarTablasDatos(res);
+                 } else {
+                    alert("Error obteniendo datos: " + res.message);
+                 }
+              })
+              .withFailureHandler(function(err) {
+                 document.getElementById('cargandoDatos').classList.add('hidden');
+                 document.getElementById('cargandoDatos').innerText = "Recuperando tablas de datos...";
+                 alert("Error de conexión: " + err);
+              })
+              .actualizarFechasEstadisticas(d1, g1);
         }
     }
 
@@ -1691,6 +1735,11 @@
     function dibujarTablasDatos(data) {
         let container = document.getElementById('contenedorTablasDatos');
         let html = "";
+        
+        if (data.fechas) {
+            if (data.fechas.d1) document.getElementById('inputFechaD1').value = data.fechas.d1;
+            if (data.fechas.g1) document.getElementById('inputFechaG1').value = data.fechas.g1;
+        }
 
         html += renderTable("Tabla 1: Instalaciones",
             ["Ins_Agendada", "Ins_Realizada", "Ins_No_Realizada", "Ins_Reagendar", "Cancelo", "Ins_Si_Reagendo", "Ins_No_Reagendo"],
