@@ -337,8 +337,8 @@
   <div id="vistaDatosAdmin" class="hidden fixed inset-0 bg-slate-50 z-[110] overflow-auto flex flex-col">
     <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
       <div>
-         <h2 class="text-xl font-bold">Datos de Estadística General</h2>
-         <p class="text-xs text-indigo-200 mt-1">Consulta la información y modifica el rango de fechas.</p>
+         <h2 class="text-xl font-bold">Dashboard de Estadística General</h2>
+         <p class="text-xs text-indigo-200 mt-1">Consulta tus KPIs y modifica el rango de fechas para actualizar.</p>
       </div>
       <div class="flex items-center gap-3">
         <button onclick="sincronizarDatosEstaGral()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
@@ -349,8 +349,9 @@
         </button>
       </div>
     </div>
-    <div class="flex-1 p-6 overflow-auto">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6 flex flex-wrap gap-6 items-end">
+    <div class="flex-1 p-6 overflow-auto bg-slate-100">
+      
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-8 flex flex-wrap gap-6 items-end relative z-10">
           <div>
               <label class="block text-xs font-bold text-slate-600 mb-1 text-indigo-700">Fecha Inicial (Celda D1)</label>
               <input type="date" id="inputFechaD1" class="border border-indigo-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 bg-indigo-50">
@@ -364,14 +365,10 @@
           </button>
       </div>
       
-      <div id="cargandoDatosGral" class="text-center text-slate-500 py-10 font-bold">Cargando estadísticas...</div>
+      <div id="cargandoDatosGral" class="text-center text-slate-500 py-10 font-bold">Cargando métricas del Dashboard...</div>
       
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-auto hidden" id="contenedorTablaGral">
-          <table class="min-w-full text-left text-sm border-collapse" id="tablaEstaGral">
-              <thead class="bg-slate-100 text-slate-700 sticky top-0 shadow-sm" id="tablaEstaGralHeader"></thead>
-              <tbody id="tablaEstaGralBody" class="divide-y divide-slate-200"></tbody>
-          </table>
-      </div>
+      <div id="dashboardEstaGral" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+          </div>
     </div>
   </div>
 
@@ -379,7 +376,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxV83D7mTfUMN4TK0p-oPxlyLfjqhYV8ysH4v3lPFuJu_GNhX6SsYFjuiX2vTYlkvP1/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbycImSNwHqRdjpBBR_MLh6oxMwEUnUncSOcs38CuPuVlKtA2QB7XH3veeYnvNaGqVOH/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -1658,7 +1655,7 @@
     }
 
     // ==========================================
-    // FUNCIONES ESTADÍSTICA GENERAL (NUEVO)
+    // FUNCIONES ESTADÍSTICA GENERAL (DASHBOARD)
     // ==========================================
     function abrirVistaDatosAdmin() {
       if (rolUsuario !== 'admin') return;
@@ -1672,13 +1669,13 @@
 
     function sincronizarDatosEstaGral() {
       document.getElementById('cargandoDatosGral').classList.remove('hidden');
-      document.getElementById('contenedorTablaGral').classList.add('hidden');
+      document.getElementById('dashboardEstaGral').classList.add('hidden');
       
       google.script.run.withSuccessHandler(function(res) {
         document.getElementById('cargandoDatosGral').classList.add('hidden');
         if (res.status === 'success') {
           renderizarDatosEstaGral(res.data);
-          document.getElementById('contenedorTablaGral').classList.remove('hidden');
+          document.getElementById('dashboardEstaGral').classList.remove('hidden');
         } else {
           alert("Error al cargar Esta_Gral: " + res.message);
         }
@@ -1686,44 +1683,75 @@
     }
 
     function renderizarDatosEstaGral(data) {
+      const container = document.getElementById('dashboardEstaGral');
+      container.innerHTML = '';
+      
       if(!data || data.length === 0) return;
       
+      // Mapear los inputs de fechas (Fila 0, Columnas D[3] y G[6])
       let row0 = data[0] || [];
       document.getElementById('inputFechaD1').value = row0.length > 3 ? row0[3] : "";
       document.getElementById('inputFechaG1').value = row0.length > 6 ? row0[6] : "";
 
-      const thead = document.getElementById('tablaEstaGralHeader');
-      const tbody = document.getElementById('tablaEstaGralBody');
-      thead.innerHTML = '';
-      tbody.innerHTML = '';
-
+      // Construcción Dinámica del Dashboard
       data.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-        tr.className = rowIndex === 0 ? "bg-slate-50 font-bold" : "hover:bg-slate-50 transition-colors";
-        
-        row.forEach((cellValue, colIndex) => {
-          let isD1 = (rowIndex === 0 && colIndex === 3);
-          let isG1 = (rowIndex === 0 && colIndex === 6);
+          if (rowIndex === 0) return; // Se salta la fila de fechas
           
-          const cell = document.createElement(rowIndex === 0 ? 'th' : 'td');
-          let baseClass = rowIndex === 0 ? "px-4 py-3 border-b border-slate-200" : "px-4 py-2 text-slate-600 border-b border-slate-100";
-          
-          if (isD1 || isG1) {
-            cell.className = baseClass + " bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 rounded-sm";
-            cell.title = isD1 ? "Celda D1 (Editable arriba)" : "Celda G1 (Editable arriba)";
-          } else {
-            cell.className = baseClass;
+          let celdasLlenas = [];
+          for(let j = 0; j < row.length; j++) {
+              if (row[j] !== "" && row[j] !== null) {
+                  celdasLlenas.push({ idx: j, val: row[j] });
+              }
           }
           
-          cell.textContent = cellValue || "";
-          tr.appendChild(cell);
-        });
-        
-        if (rowIndex === 0) {
-          thead.appendChild(tr);
-        } else {
-          tbody.appendChild(tr);
-        }
+          if (celdasLlenas.length === 0) return; // Ignorar filas vacías
+          
+          // CASO 1: Formato "Etiqueta - Valor" (Ej. Col A = Título, Col B = Métrica)
+          if (celdasLlenas.length === 2 && celdasLlenas[0].idx === 0) {
+              let titulo = celdasLlenas[0].val;
+              let valor = celdasLlenas[1].val;
+              let esPorcentaje = valor.toString().includes('%');
+              let colorClase = esPorcentaje ? 'text-emerald-600' : 'text-indigo-700';
+              let badgeColor = esPorcentaje ? 'bg-emerald-50 border-emerald-100' : 'bg-indigo-50 border-indigo-100';
+              
+              container.innerHTML += `
+                  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-all hover:-translate-y-1">
+                      <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">${titulo}</h3>
+                      <div class="text-3xl font-black ${colorClase} ${badgeColor} self-start px-3 py-1 rounded-lg border">${valor}</div>
+                  </div>
+              `;
+          } 
+          // CASO 2: Filas con múltiples datos (Ej. Tabla horizontal)
+          else {
+              let titulo = row[0] !== "" ? row[0] : `Registro ${rowIndex}`;
+              let metricsHtml = '';
+              
+              let startIndex = row[0] !== "" ? 1 : 0;
+              for (let k = startIndex; k < celdasLlenas.length; k++) {
+                  let item = celdasLlenas[k];
+                  let cabecera = (data[0] && data[0][item.idx]) ? data[0][item.idx] : `Métrica ${item.idx + 1}`;
+                  let esPorcentaje = item.val.toString().includes('%');
+                  let colorClase = esPorcentaje ? 'text-emerald-600' : 'text-slate-800';
+                  
+                  metricsHtml += `
+                      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center">
+                          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">${cabecera}</div>
+                          <div class="text-xl font-black ${colorClase}">${item.val}</div>
+                      </div>
+                  `;
+              }
+              
+              container.innerHTML += `
+                  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 lg:col-span-3 hover:shadow-md transition-all">
+                      <h3 class="text-lg font-black text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                          <span class="w-2 h-6 rounded-full bg-indigo-500 inline-block"></span> ${titulo}
+                      </h3>
+                      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                          ${metricsHtml}
+                      </div>
+                  </div>
+              `;
+          }
       });
     }
 
