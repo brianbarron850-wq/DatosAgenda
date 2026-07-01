@@ -1517,6 +1517,15 @@
       document.getElementById('vistaAdminFiltros').classList.remove('hidden');
       sincronizarVistaAdmin();
     }
+    function abrirVistaDatosAdmin() {
+      if (rolUsuario !== 'admin') return;
+      document.getElementById('vistaDatosAdmin').classList.remove('hidden');
+      sincronizarDatosEstaGral(); // Carga las tablas y gráficas automáticamente al abrir la vista
+    }
+
+    function cerrarVistaDatosAdmin() {
+      document.getElementById('vistaDatosAdmin').classList.add('hidden');
+    }
     
     function sincronizarVistaAdmin() {
       const btn = document.getElementById('btnSincronizarAdminFiltros');
