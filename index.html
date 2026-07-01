@@ -364,6 +364,37 @@
               💾 Guardar Fechas
           </button>
       </div>
+<div class="mt-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-slate-800 px-4 py-3">
+             <h4 class="font-bold text-white uppercase tracking-wider text-sm">INSTALACIONES</h4>
+          </div>
+          <div class="overflow-x-auto bg-white">
+            <table class="w-full text-sm text-center">
+              <thead class="text-xs text-slate-600 bg-slate-100 border-b border-slate-200 uppercase">
+                <tr>
+                  <th class="px-3 py-3 border-r border-slate-200">Ins_Agendada</th>
+                  <th class="px-3 py-3 border-r border-slate-200">Ins_Realizada</th>
+                  <th class="px-3 py-3 border-r border-slate-200">Ins_No_Realizada</th>
+                  <th class="px-3 py-3 border-r border-slate-200">Ins_Reagendar</th>
+                  <th class="px-3 py-3 border-r border-slate-200">Cancelo</th>
+                  <th class="px-3 py-3 border-r border-slate-200">Ins_Si_Reagendo</th>
+                  <th class="px-3 py-3">Ins_No_Reagendo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td id="td-ins-agendada" class="px-3 py-4 font-bold text-slate-800 border-r border-slate-200">-</td>
+                  <td id="td-ins-realizada" class="px-3 py-4 font-bold text-emerald-600 border-r border-slate-200">-</td>
+                  <td id="td-ins-no-realizada" class="px-3 py-4 font-bold text-rose-500 border-r border-slate-200">-</td>
+                  <td id="td-ins-reagendar" class="px-3 py-4 font-bold text-amber-500 border-r border-slate-200">-</td>
+                  <td id="td-cancelo" class="px-3 py-4 font-bold text-red-600 border-r border-slate-200">-</td>
+                  <td id="td-ins-si-reagendo" class="px-3 py-4 font-bold text-blue-600 border-r border-slate-200">-</td>
+                  <td id="td-ins-no-reagendo" class="px-3 py-4 font-bold text-slate-500">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       
       <div id="cargandoDatosGral" class="text-center text-slate-500 py-10 font-bold">Cargando métricas del Dashboard...</div>
       
@@ -376,7 +407,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbycImSNwHqRdjpBBR_MLh6oxMwEUnUncSOcs38CuPuVlKtA2QB7XH3veeYnvNaGqVOH/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbys_LjYD8sS9kMlRING0Ou7GE_BqNsqbAwk95OQnVc9oK1Wkj-3Sbiyxacr2QsofFJo/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -1657,16 +1688,23 @@
     // ==========================================
     // FUNCIONES ESTADÍSTICA GENERAL (DASHBOARD)
     // ==========================================
-    function abrirVistaDatosAdmin() {
-      if (rolUsuario !== 'admin') return;
-      document.getElementById('vistaDatosAdmin').classList.remove('hidden');
-      sincronizarDatosEstaGral();
-    }
-
-    function cerrarVistaDatosAdmin() {
-      document.getElementById('vistaDatosAdmin').classList.add('hidden');
-    }
-
+    function cargarVistaDatos() {
+    google.script.run.withSuccessHandler(function(res) {
+        if(res.status === "success") {
+            // ---> AQUI AGREGAS EL LLENADO DE TU NUEVA TABLA
+            if(res.instalaciones) {
+                document.getElementById('td-ins-agendada').textContent = res.instalaciones.Ins_Agendada !== "" ? res.instalaciones.Ins_Agendada : "-";
+                document.getElementById('td-ins-realizada').textContent = res.instalaciones.Ins_Realizada !== "" ? res.instalaciones.Ins_Realizada : "-";
+                document.getElementById('td-ins-no-realizada').textContent = res.instalaciones.Ins_No_Realizada !== "" ? res.instalaciones.Ins_No_Realizada : "-";
+                document.getElementById('td-ins-reagendar').textContent = res.instalaciones.Ins_Reagendar !== "" ? res.instalaciones.Ins_Reagendar : "-";
+                document.getElementById('td-cancelo').textContent = res.instalaciones.Cancelo !== "" ? res.instalaciones.Cancelo : "-";
+                document.getElementById('td-ins-si-reagendo').textContent = res.instalaciones.Ins_Si_Reagendo !== "" ? res.instalaciones.Ins_Si_Reagendo : "-";
+                document.getElementById('td-ins-no-reagendo').textContent = res.instalaciones.Ins_No_Reagendo !== "" ? res.instalaciones.Ins_No_Reagendo : "-";
+            }
+            // (El resto del código que llena tus gráficas/tablas originales se mantiene igual aquí)
+        }
+    }).obtenerDatosEstaGral();
+}
     function sincronizarDatosEstaGral() {
       document.getElementById('cargandoDatosGral').classList.remove('hidden');
       document.getElementById('dashboardEstaGral').classList.add('hidden');
