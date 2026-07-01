@@ -364,7 +364,8 @@
               💾 Guardar Fechas
           </button>
       </div>
-<div class="mt-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+      
+      <div class="mt-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-slate-800 px-4 py-3">
              <h4 class="font-bold text-white uppercase tracking-wider text-sm">INSTALACIONES</h4>
           </div>
@@ -394,12 +395,12 @@
               </tbody>
             </table>
           </div>
-        </div>
+      </div>
       
       <div id="cargandoDatosGral" class="text-center text-slate-500 py-10 font-bold">Cargando métricas del Dashboard...</div>
       
-      <div id="dashboardEstaGral" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
-          </div>
+      <div id="dashboardEstaGral" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden mt-6">
+      </div>
     </div>
   </div>
 
@@ -407,7 +408,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbys_LjYD8sS9kMlRING0Ou7GE_BqNsqbAwk95OQnVc9oK1Wkj-3Sbiyxacr2QsofFJo/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbygZf7v4KKHaEWQzXwG0aHsR5h3xqmwuQ-lU7TynMdH8a9qUkmwe6hhYsPNct52jtsp/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -1688,23 +1689,7 @@
     // ==========================================
     // FUNCIONES ESTADÍSTICA GENERAL (DASHBOARD)
     // ==========================================
-    function cargarVistaDatos() {
-    google.script.run.withSuccessHandler(function(res) {
-        if(res.status === "success") {
-            // ---> AQUI AGREGAS EL LLENADO DE TU NUEVA TABLA
-            if(res.instalaciones) {
-                document.getElementById('td-ins-agendada').textContent = res.instalaciones.Ins_Agendada !== "" ? res.instalaciones.Ins_Agendada : "-";
-                document.getElementById('td-ins-realizada').textContent = res.instalaciones.Ins_Realizada !== "" ? res.instalaciones.Ins_Realizada : "-";
-                document.getElementById('td-ins-no-realizada').textContent = res.instalaciones.Ins_No_Realizada !== "" ? res.instalaciones.Ins_No_Realizada : "-";
-                document.getElementById('td-ins-reagendar').textContent = res.instalaciones.Ins_Reagendar !== "" ? res.instalaciones.Ins_Reagendar : "-";
-                document.getElementById('td-cancelo').textContent = res.instalaciones.Cancelo !== "" ? res.instalaciones.Cancelo : "-";
-                document.getElementById('td-ins-si-reagendo').textContent = res.instalaciones.Ins_Si_Reagendo !== "" ? res.instalaciones.Ins_Si_Reagendo : "-";
-                document.getElementById('td-ins-no-reagendo').textContent = res.instalaciones.Ins_No_Reagendo !== "" ? res.instalaciones.Ins_No_Reagendo : "-";
-            }
-            // (El resto del código que llena tus gráficas/tablas originales se mantiene igual aquí)
-        }
-    }).obtenerDatosEstaGral();
-}
+    
     function sincronizarDatosEstaGral() {
       document.getElementById('cargandoDatosGral').classList.remove('hidden');
       document.getElementById('dashboardEstaGral').classList.add('hidden');
@@ -1731,9 +1716,22 @@
       document.getElementById('inputFechaD1').value = row0.length > 3 ? row0[3] : "";
       document.getElementById('inputFechaG1').value = row0.length > 6 ? row0[6] : "";
 
-      // Construcción Dinámica del Dashboard
+      // --- TABLA FIJA DE INSTALACIONES (Fila 4 de Google Sheets = Índice 3) ---
+      if (data.length > 3) {
+          let row4 = data[3] || [];
+          document.getElementById('td-ins-agendada').textContent = (row4[1] !== undefined && row4[1] !== "") ? row4[1] : "-";
+          document.getElementById('td-ins-realizada').textContent = (row4[2] !== undefined && row4[2] !== "") ? row4[2] : "-";
+          document.getElementById('td-ins-no-realizada').textContent = (row4[3] !== undefined && row4[3] !== "") ? row4[3] : "-";
+          document.getElementById('td-ins-reagendar').textContent = (row4[4] !== undefined && row4[4] !== "") ? row4[4] : "-";
+          document.getElementById('td-cancelo').textContent = (row4[5] !== undefined && row4[5] !== "") ? row4[5] : "-";
+          document.getElementById('td-ins-si-reagendo').textContent = (row4[6] !== undefined && row4[6] !== "") ? row4[6] : "-";
+          document.getElementById('td-ins-no-reagendo').textContent = (row4[7] !== undefined && row4[7] !== "") ? row4[7] : "-";
+      }
+
+      // Construcción Dinámica del Dashboard (Se omite la fila 4 para no duplicarla)
       data.forEach((row, rowIndex) => {
           if (rowIndex === 0) return; // Se salta la fila de fechas
+          if (rowIndex === 3) return; // Se salta la fila 4 (Ya usada en la tabla INSTALACIONES)
           
           let celdasLlenas = [];
           for(let j = 0; j < row.length; j++) {
