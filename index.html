@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Agenda Dinámica</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .slot-card { transition: all 0.2s ease; }
     .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -86,6 +87,9 @@
             </button>
             <button onclick="abrirVistaGeneralAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
               📊 Vista General
+            </button>
+            <button onclick="abrirDashboardEstadisticas()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
+              📈 Datos
             </button>
           </div>
         </div>
@@ -323,30 +327,59 @@
     </div>
   </div>
 
-  <div id="vistaAdminFiltros" class="hidden fixed inset-0 bg-slate-50 z-[110] overflow-auto flex flex-col">
-    <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+  <div id="vistaAdminFiltros" class="hidden fixed inset-0 bg-slate-100 z-[110] overflow-auto flex flex-col">
+    <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
       <div>
          <h2 class="text-xl font-bold">Base de Datos General (Solo Lectura)</h2>
-         <p class="text-xs text-slate-300 mt-1">Busca por palabra exacta o establece rangos de fechas.</p>
+         <p class="text-xs text-indigo-200 mt-1">Busca por palabra exacta o establece rangos de fechas.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button id="btnSincronizarAdminFiltros" onclick="sincronizarVistaAdmin()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+        <button id="btnSincronizarAdminFiltros" onclick="sincronizarVistaAdmin()" class="bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
           🔄 Sincronizar
         </button>
-        <button onclick="cerrarVistaGeneralAdmin()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+        <button onclick="cerrarVistaGeneralAdmin()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
            Volver a la Agenda
         </button>
       </div>
     </div>
     <div class="flex-1 p-6 overflow-auto">
       <div id="cargandoTablaAdmin" class="text-center text-slate-500 py-10 font-bold">Recuperando registros desde Google Sheets...</div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-auto">
+      <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-auto">
         <table class="min-w-full text-left text-xs border-collapse hidden" id="tablaAdminCompleta">
-          <thead class="bg-slate-100 text-slate-700 sticky top-0 shadow-sm" id="tablaAdminHeader"></thead>
-          <tbody id="tablaAdminBody" class="divide-y divide-slate-200"></tbody>
+          <thead class="bg-indigo-700 text-white sticky top-0 shadow-md z-10" id="tablaAdminHeader"></thead>
+          <tbody id="tablaAdminBody" class="divide-y divide-slate-200 bg-white"></tbody>
         </table>
       </div>
       <div class="mt-4 text-right text-xs font-semibold text-slate-500" id="totalFilasMostradas"></div>
+    </div>
+  </div>
+
+  <div id="vistaDashboardEstadisticas" class="hidden fixed inset-0 bg-slate-100 z-[110] overflow-auto flex flex-col">
+    <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+      <div>
+         <h2 class="text-xl font-bold">Dashboard de Estadísticas</h2>
+         <p class="text-xs text-indigo-200 mt-1">Análisis de métricas y datos de la pestaña Esta_Gral</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="cerrarDashboardEstadisticas()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-sm">
+           Volver a la Agenda
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 p-4 lg:p-8 overflow-auto">
+      <div id="cargandoEstadisticas" class="text-center text-slate-500 py-10 font-bold text-lg">📊 Recuperando métricas desde Google Sheets...</div>
+      <div id="gridEstadisticas" class="grid grid-cols-1 xl:grid-cols-2 gap-6 hidden">
+         </div>
+    </div>
+  </div>
+
+  <div id="modalGrafica" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
+    <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full p-6 relative">
+      <button onclick="document.getElementById('modalGrafica').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 text-3xl font-bold leading-none transition-colors">&times;</button>
+      <h3 id="tituloGrafica" class="text-xl font-black text-indigo-800 mb-4 text-center"></h3>
+      <div class="w-full h-[50vh] flex justify-center items-center">
+        <canvas id="canvasGrafica"></canvas>
+      </div>
     </div>
   </div>
 
@@ -354,7 +387,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxbUWM5wQOytA37PqYCNqBMlJqjzDTTCoii2vehBIVs9YML2vNk_LV5ATnRi1M1sss0/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxewHzzKgV0W6WizNPbREMfWxY0GkhgGLABWbdDH139_-XaEpvPx0ANRYRn4r6Cyno5/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -386,7 +419,8 @@
             guardarRegistroAgenda: function(d) { this._call('guardarRegistroAgenda', [d]); },
             eliminarRegistroAgenda: function(r, u) { this._call('eliminarRegistroAgenda', [r, u]); },
             renombrarCuadrillaBD: function(v, n, f) { this._call('renombrarCuadrillaBD', [v, n, f]); }, 
-            obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); }
+            obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); },
+            obtenerDatosEstadisticas: function() { this._call('obtenerDatosEstadisticas', []); }
           }
         }
       };
@@ -476,7 +510,6 @@
     // Rastreo de drag para no interrumpir el sync automático
     document.addEventListener('dragend', function() { window.isDragging = false; });
 
-    // FUNCION DE VERIFICACION REDISEÑADA PARA EVITAR CONGELAMIENTO
     function verificarPin() {
       try {
           const pinInput = document.getElementById('inputPin');
@@ -726,7 +759,6 @@
         document.getElementById('form_coordenadasoentrecalles').value = data.coordenadas || "";
         if (data.colonia) {
             let valorExactoColonia = asegurarOpcionSelect('form_coloniaofracc', data.colonia);
-            document.getElementById('form_coloniaofracc').value = valorExactoColonia;
             try {
                 let listaColonias = []; let stored = safeStorage.getItem('config_lista_colonias');
                 if (stored) listaColonias = JSON.parse(stored);
@@ -1021,12 +1053,17 @@
     function asegurarOpcionSelect(idSelect, valor) {
         if (!valor) return valor;
         let select = document.getElementById(idSelect); if (!select) return valor;
-        let existe = false; let valorExacto = valor;
+        let existe = false; 
         for (let i = 0; i < select.options.length; i++) {
-            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { existe = true; valorExacto = select.options[i].value; break; }
+            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { 
+                existe = true; select.value = select.options[i].value; break; 
+            }
         }
-        if (!existe) { let opt = document.createElement('option'); opt.value = valor; opt.innerText = valor; select.appendChild(opt); }
-        return valorExacto;
+        if (!existe) { 
+            let opt = document.createElement('option'); opt.value = valor; opt.innerText = valor; select.appendChild(opt); 
+            select.value = valor;
+        }
+        return select.value;
     }
 
     function abrirModalNuevo(cuadrilla, espacio) {
@@ -1039,7 +1076,6 @@
       document.getElementById('form_espacio').value = espacio;
       
       asegurarOpcionSelect('form_tecnico', cuadrilla);
-      document.getElementById('form_tecnico').value = cuadrilla;
       document.getElementById('modalTitulo').innerText = "Nuevo Registro - " + cuadrilla;
       document.getElementById('btnEliminarRegistro').classList.add('hidden');
       
@@ -1070,6 +1106,7 @@
          }
       });
       
+      asegurarOpcionSelect('form_tecnico', cita.tecnico);
       document.getElementById('modalTitulo').innerText = "Editar Registro - " + cita.nombredelcliente;
       
       if(rolUsuario === 'admin') {
@@ -1121,7 +1158,6 @@
       const btn = document.getElementById('btnGuardarRegistro');
       btn.innerHTML = "Guardando..."; btn.disabled = true;
       
-      // SISTEMA DE PRESERVACIÓN DE DATOS BLINDADO
       let citaOriginal = rowNum ? baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; }) : null;
       let datosPayload = citaOriginal ? Object.assign({}, citaOriginal) : {};
       
@@ -1222,7 +1258,6 @@
            let lista = []; try { let stored = safeStorage.getItem(confKey); if (stored) lista = JSON.parse(stored); } catch(e) {}
            lista.forEach(function(item) { let opt = document.createElement('option'); opt.value = item; opt.innerText = item; el.appendChild(opt); });
            
-           // Aseguramos que el valor previo no se pierda al recargar la lista
            if(valorAnterior) { 
                let existe = false;
                for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break; } }
@@ -1233,7 +1268,7 @@
     }
 
     // ==========================================
-    // SISTEMA DRAG & DROP REACTIVADO
+    // SISTEMA DRAG & DROP
     // ==========================================
     function dragStart(ev, rowNum) {
         window.isDragging = true;
@@ -1371,24 +1406,26 @@
 
       baseDatosCompletaAdmin.headers.forEach((header, index) => {
         const th = document.createElement('th');
-        th.className = "px-3 py-2.5 font-bold text-slate-700 whitespace-nowrap uppercase tracking-wider border-b border-slate-200 text-[11px]";
+        th.className = "px-3 py-2.5 font-bold text-slate-700 whitespace-nowrap uppercase tracking-wider border-b border-indigo-200 text-[11px]";
         th.textContent = header; filaTitulos.appendChild(th);
 
-        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-slate-300";
+        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-indigo-200 bg-indigo-800";
         if (header.toLowerCase().includes('fecha')) {
           const divRange = document.createElement('div'); divRange.className = "flex flex-col gap-1 min-w-[110px]";
-          const inputInicio = document.createElement('input'); inputInicio.type = "date"; inputInicio.id = `filtro_admin_col_${index}_inicio`; inputInicio.title = "Fecha Inicial"; inputInicio.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputInicio.addEventListener('input', ejecutarFiltrosAdmin);
-          const inputFin = document.createElement('input'); inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final"; inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
+          const inputInicio = document.createElement('input'); inputInicio.type = "date"; inputInicio.id = `filtro_admin_col_${index}_inicio`; inputInicio.title = "Fecha Inicial"; inputInicio.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500 text-slate-800"; inputInicio.addEventListener('input', ejecutarFiltrosAdmin);
+          const inputFin = document.createElement('input'); inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final"; inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500 text-slate-800"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
           divRange.appendChild(inputInicio); divRange.appendChild(inputFin); thFiltro.appendChild(divRange);
         } else {
-          const inputTexto = document.createElement('input'); inputTexto.type = "text"; inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin); thFiltro.appendChild(inputTexto);
+          const inputTexto = document.createElement('input'); inputTexto.type = "text"; inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500 text-slate-800"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin); thFiltro.appendChild(inputTexto);
         }
         filaFiltros.appendChild(thFiltro);
       });
       thead.appendChild(filaTitulos); thead.appendChild(filaFiltros);
       
       baseDatosCompletaAdmin.rows.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors"; tr.id = `fila_admin_raw_${rowIndex}`;
+        const tr = document.createElement('tr'); 
+        tr.className = "hover:bg-indigo-50 even:bg-slate-50 transition-colors"; 
+        tr.id = `fila_admin_raw_${rowIndex}`;
         row.forEach((cellValue) => {
           const td = document.createElement('td'); td.className = "px-3 py-2 whitespace-nowrap text-slate-600 max-w-[200px] truncate text-[11px]"; td.textContent = cellValue || ""; td.title = cellValue || ""; tr.appendChild(td);
         });
@@ -1426,28 +1463,4 @@
           }
         }
         const elemFila = document.getElementById(`fila_admin_raw_${rowIndex}`);
-        if (elemFila) { if (cumpleFiltros) { elemFila.classList.remove('hidden'); contadorVisibles++; } else { elemFila.classList.add('hidden'); } }
-      });
-      document.getElementById('totalFilasMostradas').textContent = `Registros filtrados: ${contadorVisibles} de ${rowsData.length}`;
-    }
-  </script>
-<div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
-  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-    <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-      <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
-      <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
-    </div>
-    
-    <div class="p-4 border-b border-slate-200 bg-slate-50">
-      <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
-      <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-    </div>
-
-    <div class="p-6 overflow-y-auto flex-1">
-      <div id="listaClientesSimilares" class="space-y-3">
-        </div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
+        if (elemFila) { if (cum
