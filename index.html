@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Agenda Dinámica</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .slot-card { transition: all 0.2s ease; }
     .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -371,6 +372,22 @@
     </div>
   </div>
 
+  <div id="modalGrafica" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-[130]">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] flex flex-col overflow-hidden transform transition-all">
+      <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0 border-b border-slate-700">
+        <h3 id="modalGraficaTitulo" class="font-black text-xl tracking-wide text-indigo-300 uppercase">Detalle y Gráfica</h3>
+        <button type="button" onclick="cerrarModalGrafica()" class="text-slate-400 hover:text-white text-3xl font-bold p-1 leading-none transition-colors">×</button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-6 bg-slate-50">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 h-80 shrink-0">
+          <canvas id="canvasGrafica"></canvas>
+        </div>
+        <div id="modalGraficaTabla" class="w-full"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
@@ -448,6 +465,10 @@
     let baseDatosGoogle = [];
     let espaciosPorFecha = {};
     let rolUsuario = null;
+    
+    // Variables globales para la vista de Datos
+    window.tablasDataCache = [];
+    window.miGraficaActual = null;
     
     function normalizarTecnico(texto) {
         if (!texto) return "";
@@ -1654,7 +1675,7 @@
     }
 
     // ==========================================
-    // NUEVO: FUNCIONES VISTA DATOS Y TABLAS (CON FECHAS Y ESTILOS MODERNOS)
+    // NUEVO: FUNCIONES VISTA DATOS, TABLAS Y GRÁFICAS
     // ==========================================
     function abrirVistaDatos() {
         document.getElementById('vistaDatosContainer').classList.remove('hidden');
@@ -1720,13 +1741,19 @@
         return val;
     }
 
-    function renderTable(title, headers, dataCols) {
+    // RENDERIZAR TABLA COMPLETA CON EVENTO ONCLICK
+    function renderTable(index, title, headers, dataCols) {
         let maxRows = 0;
         dataCols.forEach(function(col) { if(col.length > maxRows) maxRows = col.length; });
 
-        let html = '<div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden transform hover:-translate-y-1 transition-all duration-300">';
+        let html = '<div onclick="abrirModalGrafica(' + index + ')" class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer relative group">';
+        
+        // Etiqueta Hover
+        html += '<div class="absolute inset-0 bg-indigo-900/5 z-10 hidden group-hover:flex items-center justify-center pointer-events-none transition-all duration-300"><span class="bg-indigo-600 text-white font-bold px-5 py-2.5 rounded-full shadow-xl text-sm border border-indigo-400">📊 Clic para Detalle y Gráfica</span></div>';
+        
         html += '<div class="bg-gradient-to-r from-indigo-600 to-indigo-800 px-5 py-4 flex items-center gap-2">';
         html += '<span class="text-white text-lg font-black tracking-wide">' + title + '</span></div>';
+        
         html += '<div class="overflow-x-auto"><table class="min-w-full text-center text-xs border-collapse">';
         html += '<thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px]"><tr>';
         
@@ -1755,7 +1782,45 @@
         return html;
     }
 
+    // RENDERIZAR TABLA ESTÁTICA PARA EL MODAL (SIN HOVER NI ONCLICK)
+    function renderTableStatic(headers, dataCols) {
+        let maxRows = 0;
+        dataCols.forEach(function(col) { if(col.length > maxRows) maxRows = col.length; });
+
+        let html = '<div class="overflow-x-auto"><table class="min-w-full text-center text-xs border-collapse">';
+        html += '<thead class="bg-slate-100 text-slate-600 uppercase tracking-wider text-[11px]"><tr>';
+        
+        headers.forEach(function(h) {
+            html += '<th class="px-4 py-3 border-b border-slate-200 font-black whitespace-nowrap">' + h + '</th>';
+        });
+        
+        html += '</tr></thead><tbody class="divide-y divide-slate-200">';
+
+        for (let i = 0; i < maxRows; i++) {
+            html += '<tr class="hover:bg-slate-50 transition-colors">';
+            for (let j = 0; j < headers.length; j++) {
+                let val = (dataCols[j] && dataCols[j][i] !== undefined) ? dataCols[j][i] : "";
+                val = formatCell(val);
+                
+                let tdClass = "px-4 py-3 whitespace-nowrap text-slate-700 font-medium text-[12px]";
+                if (String(val).includes('%')) tdClass += " text-indigo-700 font-bold";
+                
+                html += '<td class="' + tdClass + '">' + val + '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        return html;
+    }
+
+    function addT(title, headers, dataCols) {
+        let index = window.tablasDataCache.length;
+        window.tablasDataCache.push({ title: title, headers: headers, dataCols: dataCols });
+        return renderTable(index, title, headers, dataCols);
+    }
+
     function dibujarTablasDatos(data) {
+        window.tablasDataCache = [];
         let container = document.getElementById('contenedorTablasDatos');
         let html = "";
         
@@ -1764,43 +1829,43 @@
             if (data.fechas.g1) document.getElementById('inputFechaG1').value = data.fechas.g1;
         }
 
-        html += renderTable("Tabla 1: Instalaciones",
+        html += addT("Tabla 1: Instalaciones",
             ["Ins_Agendada", "Ins_Realizada", "Ins_No_Realizada", "Ins_Reagendar", "Cancelo", "Ins_Si_Reagendo", "Ins_No_Reagendo"],
             [data.tabla1.agendada, data.tabla1.realizada, data.tabla1.no_realizada, data.tabla1.reagendar, data.tabla1.cancelo, data.tabla1.si_reagendo, data.tabla1.no_reagendo]);
 
-        html += renderTable("Tabla 2: Paquetes",
+        html += addT("Tabla 2: Paquetes",
             ["30mb", "50mb", "Ins_Cortesias", "Reactivación DES", "Reactivación"],
             [data.tabla2.mb30, data.tabla2.mb50, data.tabla2.cortesias, data.tabla2.react_des, data.tabla2.react]);
 
-        html += renderTable("Tabla 3: ¿Por qué medio se dio cuenta de nosotros?",
+        html += addT("Tabla 3: ¿Por qué medio se dio cuenta de nosotros?",
             ["Amigo/familiar", "Facebook", "Radio", "Rotulados", "Otro", "No contesto", "Es cliente", "Pagina web", "Total"],
             [data.tabla3.amigo, data.tabla3.facebook, data.tabla3.radio, data.tabla3.rotulados, data.tabla3.otro, data.tabla3.no_contesto, data.tabla3.es_cliente, data.tabla3.pagina_web, data.tabla3.total]);
 
-        html += renderTable("Tabla 4: Soportes",
+        html += addT("Tabla 4: Soportes",
             ["Sop_Agendada", "Sop_Realizada", "Sop_No_Realizada", "Sop_Reagendo", "Sop_Reagendada", "Sop_Des", "Sop_Cancelo"],
             [data.tabla4.agendada, data.tabla4.realizada, data.tabla4.no_realizada, data.tabla4.reagendo, data.tabla4.reagendada, data.tabla4.des, data.tabla4.cancelo]);
 
-        html += renderTable("Tabla 5: Motivos de Soportes",
+        html += addT("Tabla 5: Motivos de Soportes",
             ["Malas capacidades", "Modelo de módem", "Intermitencia", "LAN intermitente", "Antena no genera conexión", "Mal servicio SOP", "Solicitado por el cliente", "Falla de equipos", "Repetidor", "Re-ubicación de equipos", "Antena mikrotik", "Antena suelta", "Generado por el cliente", "Error humano", "Total"],
             [data.tabla5.malas_cap, data.tabla5.modem, data.tabla5.intermitencia, data.tabla5.lan, data.tabla5.antena, data.tabla5.mal_sop, data.tabla5.solicitado, data.tabla5.falla, data.tabla5.repetidor, data.tabla5.reub, data.tabla5.mikrotik, data.tabla5.suelta, data.tabla5.generado, data.tabla5.error, data.tabla5.total]);
 
-        html += renderTable("Tabla 6: Cambio de Domicilio",
+        html += addT("Tabla 6: Cambio de Domicilio",
             ["Cam_Dom_Agendada", "Cam_Dom_Realizada", "Cam_Dom_No_Realizada", "Cam_Dom_Reagendo", "Cam_Dom_Reagendada", "Cam_Dom_Null", "Cam_Dom_Cancelada"],
             [data.tabla6.agendada, data.tabla6.realizada, data.tabla6.no_realizada, data.tabla6.reagendo, data.tabla6.reagendada, data.tabla6.null_val, data.tabla6.cancelada]);
 
-        html += renderTable("Tabla 7: Desinstalaciones",
+        html += addT("Tabla 7: Desinstalaciones",
             ["Des_Agendada", "Des_Realizada", "Des_No_Realizada", "Des_Reagendo", "Des_Reagendada", "Des_Reac", "Des_Cancelada", "Equipos completos", "Solo antena", "Solo modem"],
             [data.tabla7.agendada, data.tabla7.realizada, data.tabla7.no_realizada, data.tabla7.reagendo, data.tabla7.reagendada, data.tabla7.reac, data.tabla7.cancelada, data.tabla7.completos, data.tabla7.antena, data.tabla7.modem]);
 
-        html += renderTable("Tabla 8: Estatus Cliente Desinstalaciones",
+        html += addT("Tabla 8: Estatus Cliente Desinstalaciones",
             ["Motivo", "Agendado", "Realizado", "%"],
             [data.tabla8.motivo, data.tabla8.agendado, data.tabla8.realizado, data.tabla8.porc]);
 
-        html += renderTable("Tabla 9: Motivo Desinstalación",
+        html += addT("Tabla 9: Motivo Desinstalación",
             ["Ya no se utiliza", "Muchas Fallas", "Intermitencia", "Lento", "Mal servicio CAT", "Mal servicio SOP", "Cambio de domicilio", "Ya contrato otro", "No tiene para pagar", "Tiempo de espera en visitas", "Sin motivo", "Por facturas pendientes", "Cliente fallecio", "Vendio la casa", "Desocupa casa", "Ya no lo quiere", "Soporte/Desinstalacion", "Por precio", "Total"],
             [data.tabla9.no_utiliza, data.tabla9.fallas, data.tabla9.intermitencia, data.tabla9.lento, data.tabla9.mal_cat, data.tabla9.mal_sop, data.tabla9.cambio, data.tabla9.contrato_otro, data.tabla9.no_pagar, data.tabla9.espera, data.tabla9.sin_motivo, data.tabla9.facturas, data.tabla9.fallecio, data.tabla9.vendio, data.tabla9.desocupa, data.tabla9.no_quiere, data.tabla9.sop_des, data.tabla9.precio, data.tabla9.total]);
 
-        html += renderTable("Tabla 10: Desinstalaciones Año Contratado",
+        html += addT("Tabla 10: Desinstalaciones Año Contratado",
             ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027"],
             [data.tabla10.y2017, data.tabla10.y2018, data.tabla10.y2019, data.tabla10.y2020, data.tabla10.y2021, data.tabla10.y2022, data.tabla10.y2023, data.tabla10.y2024, data.tabla10.y2025, data.tabla10.y2026, data.tabla10.y2027]);
 
@@ -1810,24 +1875,87 @@
     function cerrarVistaDatos() {
         document.getElementById('vistaDatosContainer').classList.add('hidden');
     }
-  </script>
-<div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
-  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-    <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-      <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
-      <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
-    </div>
-    
-    <div class="p-4 border-b border-slate-200 bg-slate-50">
-      <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
-      <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-    </div>
 
-    <div class="p-6 overflow-y-auto flex-1">
-      <div id="listaClientesSimilares" class="space-y-3">
-        </div>
-    </div>
-  </div>
-</div>
+    function abrirModalGrafica(index) {
+        let info = window.tablasDataCache[index];
+        if (!info) return;
+
+        // Configurar Título y Tabla
+        document.getElementById('modalGraficaTitulo').innerText = info.title;
+        document.getElementById('modalGraficaTabla').innerHTML = renderTableStatic(info.headers, info.dataCols);
+
+        // Extraer Datos para la Gráfica
+        let maxRows = 0;
+        info.dataCols.forEach(function(col) { if(col.length > maxRows) maxRows = col.length; });
+
+        let datasets = [];
+        let colores = [
+            'rgba(79, 70, 229, 0.8)',  // Indigo
+            'rgba(16, 185, 129, 0.8)', // Emerald
+            'rgba(245, 158, 11, 0.8)', // Amber
+            'rgba(239, 68, 68, 0.8)',  // Rose
+            'rgba(14, 165, 233, 0.8)'  // Sky
+        ];
+
+        for (let i = 0; i < maxRows; i++) {
+            let rowData = [];
+            for (let j = 0; j < info.headers.length; j++) {
+                let rawVal = (info.dataCols[j] && info.dataCols[j][i] !== undefined) ? info.dataCols[j][i] : 0;
+                let num = 0;
+                
+                if (rawVal !== null && rawVal !== "") {
+                    let strVal = String(rawVal).trim().replace('%', '');
+                    if (!isNaN(strVal)) {
+                        num = parseFloat(strVal);
+                        // Si es un decimal puro, para graficar lo convertimos a porcentaje también
+                        if (String(rawVal).includes('.') && num <= 1) {
+                            num = parseFloat((num * 100).toFixed(2));
+                        }
+                    }
+                }
+                rowData.push(num);
+            }
+            datasets.push({
+                label: maxRows > 1 ? 'Línea de Datos ' + (i + 1) : 'Valores',
+                data: rowData,
+                backgroundColor: colores[i % colores.length],
+                borderRadius: 4,
+                borderWidth: 0
+            });
+        }
+
+        // Destruir gráfica previa si existe para evitar superposición
+        if (window.miGraficaActual) {
+            window.miGraficaActual.destroy();
+        }
+
+        // Renderizar nueva Gráfica
+        let ctx = document.getElementById('canvasGrafica').getContext('2d');
+        window.miGraficaActual = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: info.headers,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: maxRows > 1 }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Mostrar el modal
+        document.getElementById('modalGrafica').classList.remove('hidden');
+    }
+
+    function cerrarModalGrafica() {
+        document.getElementById('modalGrafica').classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
