@@ -6,11 +6,16 @@
   <title>Gestor de Agenda Dinámica</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .slot-card { transition: all 0.2s ease; }
-    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2; }
-    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105; }
-    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80; }
+    .slot-card { transition: all 0.2s ease;
+    }
+    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2;
+    }
+    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105;
+    }
+    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80;
+    }
   </style>
   <script>
     // ==========================================
@@ -29,6 +34,7 @@
           e.preventDefault();
           return false;
         }
+      
         if (e.key.toLowerCase() === 'u') {
           e.preventDefault();
           return false;
@@ -291,17 +297,17 @@
               <input type="text" id="form_reportetecnico">
           </div>
 
-          <div class="md:col-span-2 mt-4 flex gap-2 justify-end border-t border-slate-200 pt-4 flex-wrap">
-            <button type="button" id="btnEliminarRegistro" onclick="eliminarRegistroBD()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-               🗑️ Eliminar
+          <div class="md:col-span-2 mt-4 flex gap-3 justify-end border-t border-slate-200 pt-4 flex-wrap">
+            <button type="button" id="btnDuplicarRegistro" onclick="duplicarRegistroBD()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
+               📋 Duplicar a otro día
             </button>
-            <button type="button" id="btnDuplicarRegistro" onclick="duplicarRegistroBD()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-               📋 Duplicar
+            <button type="button" id="btnEliminarRegistro" onclick="eliminarRegistroBD()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+               🗑️ Eliminar Registro
             </button>
-            <button type="button" onclick="cerrarModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">
+            <button type="button" onclick="cerrarModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">
               Cancelar
             </button>
-            <button type="submit" id="btnGuardarRegistro" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+            <button type="submit" id="btnGuardarRegistro" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
               Guardar Cambios
             </button>
           </div>
@@ -317,7 +323,8 @@
         <button type="button" onclick="cerrarModalWisphub()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
       </div>
       <div class="p-4 bg-yellow-50 text-yellow-800 text-xs border-b border-yellow-200">
-        Se encontraron varios clientes que coinciden con tu búsqueda. Por favor selecciona el correcto:
+        Se encontraron varios clientes que coinciden con tu búsqueda.
+        Por favor selecciona el correcto:
       </div>
       <div class="px-6 pt-4 pb-2 border-b border-slate-100">
         <input type="text" id="filtroIpWisphub" placeholder="🔍 Buscar o filtrar por IP..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
@@ -357,8 +364,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxSoNQrJadNPmIWfZxshv854GNczWSdrPOXn0rpYM7mAiIub53ssIunD8-GlIuN_JXS/exec"; 
-
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxSoNQrJadNPmIWfZxshv854GNczWSdrPOXn0rpYM7mAiIub53ssIunD8-GlIuN_JXS/exec";
     if (typeof google === 'undefined') {
       window.google = {
         script: {
@@ -370,7 +376,6 @@
               const failureCb = this._onFailure;
               this._onSuccess = null;
               this._onFailure = null;
-
               fetch(URL_API_GAS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -407,8 +412,7 @@
         setItem: function(key, val) { try { sessionStorage.setItem(key, val); } catch(e) { this.mem[key] = val.toString(); } },
         removeItem: function(key) { try { sessionStorage.removeItem(key); } catch(e) { delete this.mem[key]; } }
     };
-
-   const tecnicosPorDefecto = ["Cuadrilla 1", "Cuadrilla 2", "Cuadrilla 3", "Cuadrilla 4", "IVAN", "EURIEL", "JOSE", "ULISES", "EDGAR" ];
+    const tecnicosPorDefecto = ["Cuadrilla 1", "Cuadrilla 2", "Cuadrilla 3", "Cuadrilla 4", "IVAN", "EURIEL", "JOSE", "ULISES", "EDGAR" ];
     const motivosPorDefecto = ["Instalación", "Soporte", "Cambio de Domicilio", "Desinstalación", "Sop/Des", "Des/Sop", "Migracion", "Reactivacion", "CAT" ];
     const horariosPorDefecto = ["09:00am", "09:30am", "10:00am", "10:30", "11:00am", "11:30am", "Antes de las 12pm", "12:00pm", "12:30pm","Despues de las 12pm", "01:00pm", "01:30pm", "02:00pm", "02:30pm","Antes de las 3pm", "03:00pm", "03:30pm", "Despues de las 3pm", "04:00pm", "04:30pm", "05:00pm", "05:30pm", "Despues de las 6pm", "Disponibilidad"];
     const agentesPorDefecto = ["Denise", "Jenni", "Luz", "Luis", "Brian", "Fernando", "Laura", "Mario", "Jaime", "Kennya"];
@@ -419,7 +423,6 @@
     const yafueclientePorDefecto = ["No", "Sí"];
     const bienvenidaPorDefecto = ["Sí", "No", "Pendiente"];
     const mediosPorDefecto = ["Amigo/Familiar", "Facebook", "Radio", "Es cliente", "No contesto", "Rotulo", "Recomendación", "Folleto", "Página Web", "Otros"];
-    
     // PERMISOS DE TÉCNICOS ACORDES A ESTRUCTURA SOLICITADA
     const camposPermitidosTecnico = [
       'form_ip',
@@ -428,13 +431,11 @@
       'form_monto',
       'form_comentariosdeltecnico'
     ];
-    
     let baseDatosGoogle = [];
     let espaciosPorFecha = {};
     let rolUsuario = null;
     let autoSyncInterval = null;
     window.isDragging = false;
-    
     function normalizarTecnico(texto) {
         if (!texto) return "";
         return texto.toString().trim().toLowerCase().split(/\s+/).map(function(w){
@@ -458,7 +459,6 @@
           if(!safeStorage.getItem('config_lista_yafuecliente')) safeStorage.setItem('config_lista_yafuecliente', JSON.stringify(yafueclientePorDefecto));
           if(!safeStorage.getItem('config_lista_bienvenida')) safeStorage.setItem('config_lista_bienvenida', JSON.stringify(bienvenidaPorDefecto));
           if(!safeStorage.getItem('config_lista_medios')) safeStorage.setItem('config_lista_medios', JSON.stringify(mediosPorDefecto));
-          
           let cached = safeStorage.getItem('espacios_por_fecha_v4');
           if(cached) espaciosPorFecha = JSON.parse(cached);
           poblarSelects();
@@ -475,10 +475,8 @@
           }
       }
     };
-    
     // Rastreo de drag para no interrumpir el sync automático
     document.addEventListener('dragend', function() { window.isDragging = false; });
-
     // FUNCION DE VERIFICACION REDISEÑADA PARA EVITAR CONGELAMIENTO
     function verificarPin() {
       try {
@@ -523,7 +521,8 @@
           }
       } catch (e) {
           const err = document.getElementById('msgErrorPin');
-          if (err) { err.innerText = "Error local: " + e.message; err.classList.remove('hidden'); }
+          if (err) { err.innerText = "Error local: " + e.message; err.classList.remove('hidden');
+          }
           document.getElementById('btnLogin').innerHTML = "Ingresar";
           document.getElementById('btnLogin').disabled = false;
       }
@@ -534,7 +533,6 @@
       document.getElementById('modalLogin').classList.add('hidden');
       document.getElementById('appContenedor').classList.remove('hidden');
       document.getElementById('badgeRol').innerText = rol === 'admin' ? 'Administrador' : 'Técnico';
-      
       if (rol === 'tecnico') {
         document.getElementById('panelAdmin').classList.add('hidden');
         document.querySelectorAll('.admin-only').forEach(function(el) { el.classList.add('hidden') });
@@ -610,20 +608,19 @@
     }
 
     let clientesTemporalesWisphub = [];
-    
     function buscarEnWisphub(ev) {
       if (ev) ev.preventDefault();
       const nombreInput = document.getElementById('form_nombredelcliente').value.trim();
       const inputIdElement = document.getElementById('form_id_wisphub');
       const idInput = inputIdElement ? inputIdElement.value.trim() : "";
       
-      if (nombreInput === "" && idInput === "") { alert("Por favor, ingresa el Nombre o el ID del cliente para buscar en WispHub."); return; }
+      if (nombreInput === "" && idInput === "") { alert("Por favor, ingresa el Nombre o el ID del cliente para buscar en WispHub.");
+      return; }
       
       const btn = ev.currentTarget || document.querySelector('button[title="Buscar en WispHub"]');
       const originalText = btn.innerHTML;
       btn.innerHTML = "⏳";
       btn.disabled = true;
-      
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(res) {
@@ -639,7 +636,8 @@
             alert("Error al intentar conectar con WispHub: " + err);
           })
           .buscarClienteWispHub(nombreInput, idInput);
-      } else { btn.innerHTML = originalText; btn.disabled = false; alert("Entorno local detectado. Requiere despliegue de Apps Script."); }
+      } else { btn.innerHTML = originalText; btn.disabled = false; alert("Entorno local detectado. Requiere despliegue de Apps Script.");
+      }
     }
 
     function llenarCamposClienteWisp(data) {
@@ -668,17 +666,21 @@
           let estado = (data.estado || "Desconocido").toUpperCase();
           badge.innerText = estado;
           badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
-          if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
-          else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
-          else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
-          else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); } 
-          else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300'); }
+          if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
+          } 
+          else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
+          } 
+          else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300');
+          } 
+          else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
+          } 
+          else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300');
+          }
           contenedorBadge.classList.remove('hidden');
       }
     }
 
     window.clientesSimilaresTemp = [];
-    
     function mostrarModalSimilares(similares) {
       window.clientesSimilaresTemp = similares;
       renderizarListaSimilares(similares);
@@ -731,10 +733,12 @@
             let valorExactoColonia = asegurarOpcionSelect('form_coloniaofracc', data.colonia);
             document.getElementById('form_coloniaofracc').value = valorExactoColonia;
             try {
-                let listaColonias = []; let stored = safeStorage.getItem('config_lista_colonias');
+                let listaColonias = [];
+                let stored = safeStorage.getItem('config_lista_colonias');
                 if (stored) listaColonias = JSON.parse(stored);
                 if (listaColonias.indexOf(valorExactoColonia) === -1) {
-                    listaColonias.push(valorExactoColonia); safeStorage.setItem('config_lista_colonias', JSON.stringify(listaColonias));
+                    listaColonias.push(valorExactoColonia);
+                    safeStorage.setItem('config_lista_colonias', JSON.stringify(listaColonias));
                 }
             } catch(e) {}
         }
@@ -745,11 +749,16 @@
             let estado = (data.estado || "Desconocido").toUpperCase();
             badge.innerText = estado;
             badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
-            if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
-            else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
-            else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
-            else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); } 
-            else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300'); }
+            if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
+            } 
+            else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
+            } 
+            else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300');
+            } 
+            else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
+            } 
+            else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300');
+            }
             contenedorBadge.classList.remove('hidden');
         }
     }
@@ -762,7 +771,8 @@
         inputFiltro.onkeyup = function(e) {
             const terminoBusqueda = e.target.value.toLowerCase().trim();
             if (!terminoBusqueda) { renderizarListaWisphub(clientesTemporalesWisphub); } 
-            else { const filtrados = clientesTemporalesWisphub.filter(c => (c.ip || "").toLowerCase().includes(terminoBusqueda)); renderizarListaWisphub(filtrados); }
+            else { const filtrados = clientesTemporalesWisphub.filter(c => (c.ip || "").toLowerCase().includes(terminoBusqueda));
+            renderizarListaWisphub(filtrados); }
         };
         document.getElementById('modalWisphubSeleccion').classList.remove('hidden');
     }
@@ -770,7 +780,8 @@
     function renderizarListaWisphub(lista) {
         const contenedor = document.getElementById('listaClientesWisphub');
         contenedor.innerHTML = '';
-        if (lista.length === 0) { contenedor.innerHTML = '<div class="text-sm text-slate-500 text-center py-4 font-medium">No se encontraron registros con esa IP.</div>'; return; }
+        if (lista.length === 0) { contenedor.innerHTML = '<div class="text-sm text-slate-500 text-center py-4 font-medium">No se encontraron registros con esa IP.</div>';
+        return; }
         
         lista.forEach(function(c) {
             const div = document.createElement('div');
@@ -780,12 +791,14 @@
             let colorClase = estado === 'ACTIVO' ? 'bg-emerald-500' : (estado.includes('SUSPENDIDO') || estado === 'MOROSO' ? 'bg-rose-500' : 'bg-amber-500');
             div.innerHTML = '<div class="font-bold text-sm text-slate-800">' + (c.nombre || 'Sin nombre') + ' <span class="text-[10px] text-white ' + colorClase + ' px-1.5 py-0.5 rounded ml-1">' + estado + '</span></div>' +
                             '<div class="text-xs text-slate-600 mt-1.5">' + ipVisual + '📍 ' + (c.calleynumero || 'Sin dirección') + ' | 🏙️ ' + (c.colonia || 'Sin colonia') + '</div>';
-            div.onclick = function() { llenarFormularioWispHub(c); cerrarModalWisphub(); alert("¡Datos del cliente seleccionados y rellenados con éxito!"); };
+            div.onclick = function() { llenarFormularioWispHub(c); cerrarModalWisphub();
+            alert("¡Datos del cliente seleccionados y rellenados con éxito!"); };
             contenedor.appendChild(div);
         });
     }
 
-    function cerrarModalWisphub() { document.getElementById('modalWisphubSeleccion').classList.add('hidden'); }
+    function cerrarModalWisphub() { document.getElementById('modalWisphubSeleccion').classList.add('hidden');
+    }
 
     function sincronizarDatos() {
       const btn = document.getElementById('btnSincronizar');
@@ -821,12 +834,8 @@
               cuadrillasHoy.push(c.tecnico);
           }
       });
-      
       cuadrillasHoy.forEach(function(tec) {
           let citasTec = baseDatosGoogle.filter(function(c) { return c.fecha === fechaActual && c.tecnico === tec; });
-          
-          let horariosLower = horariosPorDefecto.map(function(h) { return h.toLowerCase(); });
-
           citasTec.sort(function(a, b) {
               let horA = (a.horario || "").trim().toLowerCase();
               let horB = (b.horario || "").trim().toLowerCase();
@@ -835,14 +844,6 @@
 
               if (isDispA && !isDispB) return 1;
               if (!isDispA && isDispB) return -1;
-              
-              let idxA = horariosLower.indexOf(horA);
-              let idxB = horariosLower.indexOf(horB);
-              
-              if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-              if (idxA !== -1) return -1;
-              if (idxB !== -1) return 1;
-
               if (horA < horB) return -1;
               if (horA > horB) return 1;
               return 0;
@@ -850,7 +851,6 @@
 
           citasTec.forEach(function(cita, idx) { cita.espacio = idx + 1; });
       });
-      
       let cuadrillasDelDia = {};
       baseDatosGoogle.forEach(function(cita) {
           if (cita.fecha === fechaActual && cita.tecnico && !ocultasHoy[cita.tecnico]) {
@@ -862,7 +862,7 @@
               if (!cita.espacio || isNaN(parseInt(cita.espacio)) || parseInt(cita.espacio) <= 0) {
                   let esp = 1;
                   while (baseDatosGoogle.some(function(c) { return c.fecha === fechaActual && c.tecnico === cita.tecnico && c.espacio == esp && c.rowNum != cita.rowNum; })) {
-                      esp++;
+                       esp++;
                   }
                   cita.espacio = esp;
               }
@@ -870,13 +870,11 @@
               if (espNum > cuadrillasDelDia[cita.tecnico]) { cuadrillasDelDia[cita.tecnico] = espNum; }
           }
       });
-      
       Object.keys(manualesHoy).forEach(function(tec) {
           if (!cuadrillasDelDia[tec] && !ocultasHoy[tec]) {
               cuadrillasDelDia[tec] = (espaciosPorFecha[fechaActual] && espaciosPorFecha[fechaActual][tec]) ? espaciosPorFecha[fechaActual][tec] : 4;
           }
       });
-      
       espaciosPorFecha[fechaActual] = cuadrillasDelDia;
       safeStorage.setItem('espacios_por_fecha_v4', JSON.stringify(espaciosPorFecha));
       
@@ -900,7 +898,6 @@
       
       const gridDiv = document.createElement('div');
       gridDiv.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-" + Math.min(cuadrillasVisibles.length, 4) + " gap-4 items-start";
-      
       cuadrillasVisibles.forEach(function(cuadrilla) {
           const numEspacios = cuadrillasDelDia[cuadrilla];
           const colDiv = document.createElement('div');
@@ -921,45 +918,43 @@
           let htmlCol = '<div class="flex justify-between items-center bg-indigo-600 text-white p-2 rounded mb-3 shadow">' +
               '<h3 class="font-bold text-sm tracking-wide uppercase truncate w-full pl-1">' + cuadrilla + '</h3>' + btnRuta + adminControles +
           '</div><div class="space-y-3">';
-          
           for(let i = 1; i <= numEspacios; i++) {
               const cita = baseDatosGoogle.find(function(c) { return c.tecnico === cuadrilla && c.fecha === fechaActual && c.espacio == i; });
               if (cita) {
                   let motivoText = (cita.motivo || "").toLowerCase();
-                  
+                  // ====== APLICACIÓN DE LA NUEVA LÓGICA DE COLORES Y BADGES ======
                   let serealizoVal = (cita.serealizo || "").toString().trim().toLowerCase();
                   let colorClass = "border-slate-300 bg-white hover:border-indigo-400 text-slate-800"; 
                   let badgeHtml = '';
                   let extraTitleMargin = '';
                   let hasCustomStatus = true;
-
                   if (serealizoVal === 'sí' || serealizoVal === 'si') { 
-                      colorClass = "border-emerald-500 bg-emerald-50 hover:bg-emerald-100 text-emerald-900"; 
+                      colorClass = "border-emerald-500 bg-emerald-50 hover:bg-emerald-100 text-emerald-900";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Realizado</div>';
                       extraTitleMargin = 'mt-5';
                   } 
                   else if (serealizoVal === 'no') { 
-                      colorClass = "border-rose-400 bg-rose-50 hover:bg-rose-100 text-rose-900"; 
+                      colorClass = "border-rose-400 bg-rose-50 hover:bg-rose-100 text-rose-900";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-rose-400 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">No Realizado</div>';
                       extraTitleMargin = 'mt-5';
                   }
                   else if (serealizoVal === 'pendiente') { 
-                      colorClass = "border-slate-400 bg-slate-100 hover:bg-slate-200 text-slate-800"; 
+                      colorClass = "border-slate-400 bg-slate-100 hover:bg-slate-200 text-slate-800";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-slate-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Pendiente</div>';
                       extraTitleMargin = 'mt-5';
                   }
                   else if (serealizoVal === 'cancelado' || serealizoVal === 'cancelo') { 
-                      colorClass = "border-red-600 bg-red-100 hover:bg-red-200 text-red-900"; 
+                      colorClass = "border-red-600 bg-red-100 hover:bg-red-200 text-red-900";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Cancelado</div>';
                       extraTitleMargin = 'mt-5';
                   }
                   else if (serealizoVal === 'reagendar') { 
-                      colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; 
+                      colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Reagendar</div>';
                       extraTitleMargin = 'mt-5';
                   }
                   else if (serealizoVal === 'reagendo') { 
-                      colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; 
+                      colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900";
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Reagendo</div>';
                       extraTitleMargin = 'mt-5';
                   }
@@ -967,20 +962,26 @@
                       hasCustomStatus = false;
                   }
 
+                  // Fallback: si no tiene un estatus asignado, lo pintamos basado en el Motivo de la cita
                   if (!hasCustomStatus) {
-                      if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; } 
-                      else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; } 
-                      else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900"; }
+                      if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900";
+                      } 
+                      else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900";
+                      } 
+                      else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900";
+                      }
                   }
+                  // ==============================================================
 
-                  let urlMaps = cita.coordenadasoentrecalles ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
-                  let coordsHtml = cita.coordenadasoentrecalles ? '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
+                  let urlMaps = cita.coordenadasoentrecalles ?
+                  "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
+                  let coordsHtml = cita.coordenadasoentrecalles ?
+                  '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
                   let urlMaps2 = cita.coordenadasoentrecalles2 ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles2) : "#";
-                  let coordsHtml2 = cita.coordenadasoentrecalles2 ? '<a href="' + urlMaps2 + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir 2da en Google Maps">📍 (Destino): ' + cita.coordenadasoentrecalles2 + '</a>' : '';
-                  
+                  let coordsHtml2 = cita.coordenadasoentrecalles2 ?
+                  '<a href="' + urlMaps2 + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir 2da en Google Maps">📍 (Destino): ' + cita.coordenadasoentrecalles2 + '</a>' : '';
                   let realLink = cita.linkCliente ? (cita.linkCliente.indexOf('http') === 0 ? cita.linkCliente : 'https://' + cita.linkCliente) : "#";
                   let linkHtml = cita.linkCliente ? '<a href="' + realLink + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold break-all truncate block mt-1">🔗 Enlace del cliente</a>' : '';
-                  
                   let extrasHtml = '';
                   if (cita.bienvenida) extrasHtml += '<div class="text-[10.5px] text-slate-600 mt-1">👋 Bienvenida: <span class="font-bold">' + cita.bienvenida + '</span></div>';
                   if (cita.pormediosediocuentadenosotros) {
@@ -1015,7 +1016,7 @@
                            'ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event, \'' + cuadrilla + '\', ' + i + ')">' +
                           '<span class="text-xl leading-none block mb-1">+</span>' +
                           '<span class="text-[10px] font-bold uppercase tracking-wider">Añadir al Espacio ' + i + '</span>' +
-                      '</div>';
+                        '</div>';
               }
           }
           htmlCol += '</div>';
@@ -1043,13 +1044,16 @@
         }
         
         let listaTecnicos = [];
-        try { let d = safeStorage.getItem('config_lista_tecnicos'); if (d) listaTecnicos = JSON.parse(d); } catch(e){}
+        try { let d = safeStorage.getItem('config_lista_tecnicos'); if (d) listaTecnicos = JSON.parse(d);
+        } catch(e){}
         if (listaTecnicos.indexOf(nombreNuevo) === -1) {
-            listaTecnicos.push(nombreNuevo); safeStorage.setItem('config_lista_tecnicos', JSON.stringify(listaTecnicos)); poblarSelects();
+            listaTecnicos.push(nombreNuevo);
+            safeStorage.setItem('config_lista_tecnicos', JSON.stringify(listaTecnicos)); poblarSelects();
         }
         
         if (typeof google !== 'undefined' && google.script && google.script.run) {
-            const btn = document.getElementById('btnSincronizar'); if(btn) btn.innerHTML = "⏳ Actualizando...";
+            const btn = document.getElementById('btnSincronizar');
+            if(btn) btn.innerHTML = "⏳ Actualizando...";
             google.script.run.withSuccessHandler(function() { sincronizarDatos(); }).withFailureHandler(function(err) { alert("Error al renombrar: " + err); sincronizarDatos(); })
               .renombrarCuadrillaBD(nombreViejo, nombreNuevo, fecha);
         } else { renderizarAgenda(); }
@@ -1071,27 +1075,27 @@
         let select = document.getElementById(idSelect); if (!select) return valor;
         let existe = false; let valorExacto = valor;
         for (let i = 0; i < select.options.length; i++) {
-            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { existe = true; valorExacto = select.options[i].value; break; }
+            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { existe = true;
+            valorExacto = select.options[i].value; break; }
         }
-        if (!existe) { let opt = document.createElement('option'); opt.value = valor; opt.innerText = valor; select.appendChild(opt); }
+        if (!existe) { let opt = document.createElement('option');
+        opt.value = valor; opt.innerText = valor; select.appendChild(opt); }
         return valorExacto;
     }
 
     function abrirModalNuevo(cuadrilla, espacio) {
       document.getElementById('formularioAgenda').reset();
       const contenedorBadge = document.getElementById('contenedor_estado_wisphub'); if(contenedorBadge) contenedorBadge.classList.add('hidden');
-      
       document.getElementById('form_rownum').value = '';
       document.getElementById('form_fecha').value = document.getElementById('filtroFecha').value;
       document.getElementById('form_cuadrilla').value = cuadrilla;
       document.getElementById('form_espacio').value = espacio;
       
-      let valorExacto = asegurarOpcionSelect('form_tecnico', cuadrilla);
-      document.getElementById('form_tecnico').value = valorExacto;
+      asegurarOpcionSelect('form_tecnico', cuadrilla);
+      document.getElementById('form_tecnico').value = cuadrilla;
       document.getElementById('modalTitulo').innerText = "Nuevo Registro - " + cuadrilla;
-      
       document.getElementById('btnEliminarRegistro').classList.add('hidden');
-      document.getElementById('btnDuplicarRegistro').classList.add('hidden');
+      document.getElementById('btnDuplicarRegistro').classList.add('hidden'); // Ocultar al crear nuevo
       
       desbloquearCamposFormulario();
       verificarMotivo();
@@ -1110,29 +1114,23 @@
       document.getElementById('form_espacio').value = cita.espacio;
       
       const campos = ['tecnico', 'motivo', 'horario', 'nombredelcliente', 'linkCliente', 'telefono', 'ip', 'calleynumero', 'coloniaofracc', 'coordenadasoentrecalles', 'calleynumero2', 'coloniaofracc2', 'coordenadasoentrecalles2', 'agente', 'plan', 'confirmada', 'serealizo', 'yafuecliente', 'bienvenida', 'pormediosediocuentadenosotros', 'otroscual', 'monto', 'comentarios', 'comentarioscat', 'comentariosdeltecnico', 'reportetecnico'];
-      
       campos.forEach(function(c) {
          let elId = c === 'linkCliente' ? 'form_link_cliente' : 'form_' + c;
          let el = document.getElementById(elId);
          if(el) {
-             if (el.tagName === 'SELECT' && cita[c]) { 
-                 let valExacto = asegurarOpcionSelect(elId, cita[c]); 
-                 el.value = valExacto;
-             } else {
-                 el.value = cita[c] || "";
-             }
+             if (el.tagName === 'SELECT' && cita[c]) { asegurarOpcionSelect(elId, cita[c]); }
+             el.value = cita[c] || "";
          }
       });
-      
       document.getElementById('modalTitulo').innerText = "Editar Registro - " + cita.nombredelcliente;
       
       if(rolUsuario === 'admin') {
           document.getElementById('btnEliminarRegistro').classList.remove('hidden');
-          document.getElementById('btnDuplicarRegistro').classList.remove('hidden');
+          document.getElementById('btnDuplicarRegistro').classList.remove('hidden'); // Mostrar para admin
           desbloquearCamposFormulario();
       } else {
           document.getElementById('btnEliminarRegistro').classList.add('hidden');
-          document.getElementById('btnDuplicarRegistro').classList.add('hidden');
+          document.getElementById('btnDuplicarRegistro').classList.add('hidden'); // Ocultar para técnico
           bloquearCamposParaTecnico();
       }
       
@@ -1146,11 +1144,11 @@
       const ipIngresada = document.getElementById('form_ip').value.trim();
       if (ipIngresada !== "") {
         const ipRegEx = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        if (!ipRegEx.test(ipIngresada)) { alert("⚠️ El formato de la IP es incorrecto (Ej. 192.168.1.1). Por favor, corrígelo o deja el campo vacío."); return; }
+        if (!ipRegEx.test(ipIngresada)) { alert("⚠️ El formato de la IP es incorrecto (Ej. 192.168.1.1). Por favor, corrígelo o deja el campo vacío.");
+        return; }
       }
 
       if (!confirm("¿Estás seguro de que deseas guardar este registro?")) return;
-
       const rowNum = document.getElementById('form_rownum').value;
       const fecha = document.getElementById('form_fecha').value;
       
@@ -1158,11 +1156,11 @@
       let cuadrillaOriginal = document.getElementById('form_cuadrilla').value;
       if (!inputTecnico || inputTecnico.trim() === "") { inputTecnico = cuadrillaOriginal; }
       const tecnico = normalizarTecnico(inputTecnico);
-      
       let espacioFinal = document.getElementById('form_espacio').value;
       if (tecnico !== normalizarTecnico(cuadrillaOriginal)) {
           let esp = 1;
-          while (baseDatosGoogle.some(function(c) { return c.fecha === fecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp && c.rowNum != rowNum; })) { esp++; }
+          while (baseDatosGoogle.some(function(c) { return c.fecha === fecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp && c.rowNum != rowNum; })) { esp++;
+          }
           espacioFinal = esp;
       }
 
@@ -1171,7 +1169,8 @@
         const horarioDuplicado = baseDatosGoogle.some(function(c) {
           return c.fecha === fecha && c.tecnico === tecnico && c.horario && c.horario.trim().toLowerCase() === horario.trim().toLowerCase() && c.rowNum != rowNum;
         });
-        if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + horario + "' ya está asignado a la cuadrilla '" + tecnico + "' en esta fecha. Por favor, asigne otro horario diferente."); return; }
+        if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + horario + "' ya está asignado a la cuadrilla '" + tecnico + "' en esta fecha. Por favor, asigne otro horario diferente.");
+        return; }
       }
       
       const btn = document.getElementById('btnGuardarRegistro');
@@ -1180,12 +1179,10 @@
       // SISTEMA DE PRESERVACIÓN DE DATOS BLINDADO
       let citaOriginal = rowNum ? baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; }) : null;
       let datosPayload = citaOriginal ? Object.assign({}, citaOriginal) : {};
-      
       datosPayload.rowNum = rowNum;
       datosPayload.fecha = fecha;
       datosPayload.tecnico = tecnico;
       datosPayload.espacio = espacioFinal;
-      
       if (rolUsuario === 'tecnico' && citaOriginal) {
           camposPermitidosTecnico.forEach(function(idCam) {
               let campoKey = idCam.replace('form_', '');
@@ -1226,74 +1223,62 @@
       }
     }
 
+    // ==========================================
+    // NUEVA FUNCIÓN PARA DUPLICAR REGISTRO
+    // ==========================================
     function duplicarRegistroBD() {
        const rowNum = document.getElementById('form_rownum').value;
        if(!rowNum) return;
        
-       let nuevaFecha = prompt("Ingresa la fecha para duplicar el registro (Formato: YYYY-MM-DD):", document.getElementById('filtroFecha').value);
-       if (!nuevaFecha) return;
+       let fechaActual = document.getElementById('form_fecha').value;
+       let nuevaFecha = prompt("Para duplicar este registro, ingresa la fecha destino (Formato: AAAA-MM-DD):", fechaActual);
        
-       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-       if (!dateRegex.test(nuevaFecha)) {
-           alert("Formato de fecha inválido. Por favor, utiliza el formato YYYY-MM-DD.");
+       if (!nuevaFecha || nuevaFecha.trim() === "") return;
+       
+       // Validar que se haya insertado una fecha con formato válido simple
+       const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
+       if (!regexFecha.test(nuevaFecha.trim())) {
+           alert("⚠️ Formato de fecha inválido. Por favor usa AAAA-MM-DD.");
            return;
        }
-       
-       if (!confirm("¿Estás seguro de duplicar este registro exacto para el día " + nuevaFecha + "?")) return;
-       
-       let inputTecnico = document.getElementById('form_tecnico').value;
-       let cuadrillaOriginal = document.getElementById('form_cuadrilla').value;
-       if (!inputTecnico || inputTecnico.trim() === "") { inputTecnico = cuadrillaOriginal; }
-       const tecnico = normalizarTecnico(inputTecnico);
-       
-       let esp = 1;
-       while (baseDatosGoogle.some(function(c) { return c.fecha === nuevaFecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp; })) { 
-           esp++; 
-       }
-       let espacioFinal = esp;
-       
-       const btn = document.getElementById('btnDuplicarRegistro');
-       const textOriginal = btn.innerHTML;
-       btn.innerHTML = "⏳ Duplicando..."; btn.disabled = true;
-       
+
+       if (!confirm("¿Estás seguro de que deseas duplicar este registro para el día " + nuevaFecha.trim() + "?")) return;
+
+       // Obtenemos la cita intacta original desde la memoria
        let citaOriginal = baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; });
-       let datosPayload = citaOriginal ? Object.assign({}, citaOriginal) : {};
+       if(!citaOriginal) return;
+
+       let datosPayload = Object.assign({}, citaOriginal);
        
-       datosPayload.rowNum = "";
-       datosPayload.fecha = nuevaFecha;
-       datosPayload.tecnico = tecnico;
-       datosPayload.espacio = espacioFinal;
-       datosPayload.usuario_movimiento = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
+       // Eliminamos rowNum para que Code.gs lo detecte como "registro nuevo" y lo inserte al final
+       delete datosPayload.rowNum; 
+       datosPayload.fecha = nuevaFecha.trim();
+       delete datosPayload.espacio; // Forzamos que se asigne automáticamente al final de los espacios del nuevo día
        
-       const mapeoForm = {
-          'motivo': 'form_motivo', 'horario': 'form_horario', 'nombredelcliente': 'form_nombredelcliente',
-          'linkCliente': 'form_link_cliente', 'telefono': 'form_telefono', 'ip': 'form_ip',
-          'calleynumero': 'form_calleynumero', 'coloniaofracc': 'form_coloniaofracc', 'coordenadasoentrecalles': 'form_coordenadasoentrecalles',
-          'calleynumero2': 'form_calleynumero2', 'coloniaofracc2': 'form_coloniaofracc2', 'coordenadasoentrecalles2': 'form_coordenadasoentrecalles2',
-          'agente': 'form_agente', 'plan': 'form_plan', 'confirmada': 'form_confirmada',
-          'serealizo': 'form_serealizo', 'yafuecliente': 'form_yafuecliente', 'bienvenida': 'form_bienvenida',
-          'pormediosediocuentadenosotros': 'form_pormediosediocuentadenosotros', 'otroscual': 'form_otroscual',
-          'monto': 'form_monto', 'comentarios': 'form_comentarios', 'comentarioscat': 'form_comentarioscat',
-          'comentariosdeltecnico': 'form_comentariosdeltecnico', 'reportetecnico': 'form_reportetecnico'
-       };
-       for (let prop in mapeoForm) {
-           let el = document.getElementById(mapeoForm[prop]);
-           if(el) datosPayload[prop] = el.value;
-       }
-       
+       datosPayload.usuario_movimiento = (safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa')) + " (Duplicado)";
+
+       const btn = document.getElementById('btnDuplicarRegistro');
+       const textoOriginal = btn.innerHTML;
+       btn.innerHTML = "⏳ Duplicando...";
+       btn.disabled = true;
+
        if (typeof google !== 'undefined' && google.script && google.script.run) {
            google.script.run
              .withSuccessHandler(function(res) {
                 if(res.status === 'success') { 
-                    alert("¡Registro duplicado exitosamente para la fecha " + nuevaFecha + "!");
+                    alert("✅ Registro duplicado exitosamente al " + nuevaFecha.trim());
                     cerrarModal(); 
                     sincronizarDatos(); 
-                } else { alert("Error: " + res.message); }
-                btn.innerHTML = textOriginal; btn.disabled = false;
+                } else {
+                    alert("Error al duplicar: " + res.message);
+                }
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
              })
              .withFailureHandler(function(err) {
-                alert("Error de conexión: " + err);
-                btn.innerHTML = textOriginal; btn.disabled = false;
+                alert("Error de conexión al duplicar: " + err);
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
              })
              .guardarRegistroAgenda(datosPayload);
        }
@@ -1320,7 +1305,8 @@
                  ((c.coordenadasoentrecalles && c.coordenadasoentrecalles.trim() !== "") || 
                   (c.coordenadasoentrecalles2 && c.coordenadasoentrecalles2.trim() !== "")); 
       });
-      if (citas.length === 0) { alert("No hay coordenadas o ubicaciones registradas para mapear la ruta de esta cuadrilla en el día seleccionado."); return; }
+      if (citas.length === 0) { alert("No hay coordenadas o ubicaciones registradas para mapear la ruta de esta cuadrilla en el día seleccionado.");
+      return; }
       
       citas.sort(function(a, b) { return parseInt(a.espacio) - parseInt(b.espacio); });
       let puntos = [];
@@ -1332,7 +1318,6 @@
               puntos.push(encodeURIComponent(c.coordenadasoentrecalles2.trim()));
           }
       });
-      
       let urlMapsDir = "https://www.google.com/maps/dir/" + puntos.join("/");
       window.open(urlMapsDir, '_blank');
     }
@@ -1344,19 +1329,21 @@
           'form_plan': 'config_lista_planes', 'form_confirmada': 'config_lista_confirmada', 'form_serealizo': 'config_lista_serealizo',
           'form_yafuecliente': 'config_lista_yafuecliente', 'form_bienvenida': 'config_lista_bienvenida', 'form_pormediosediocuentadenosotros': 'config_lista_medios'
        };
-       
        for (let [id, confKey] of Object.entries(selects)) {
-           let el = document.getElementById(id); if(!el) continue;
+           let el = document.getElementById(id);
+           if(!el) continue;
            let valorAnterior = el.value; el.innerHTML = '<option value="">Seleccione...</option>';
-           let lista = []; try { let stored = safeStorage.getItem(confKey); if (stored) lista = JSON.parse(stored); } catch(e) {}
+           let lista = []; try { let stored = safeStorage.getItem(confKey);
+           if (stored) lista = JSON.parse(stored); } catch(e) {}
            lista.forEach(function(item) { let opt = document.createElement('option'); opt.value = item; opt.innerText = item; el.appendChild(opt); });
-           
            // Aseguramos que el valor previo no se pierda al recargar la lista
            if(valorAnterior) { 
                let existe = false;
-               for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break; } }
-               if(!existe) { let opt = document.createElement('option'); opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
-               el.value = valorAnterior; 
+               for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break;
+               } }
+               if(!existe) { let opt = document.createElement('option');
+               opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
+               el.value = valorAnterior;
            }
        }
     }
@@ -1392,13 +1379,15 @@
       const espacioOcupado = baseDatosGoogle.some(function(c) {
           return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.espacio == nuevoEspacio && c.rowNum != cita.rowNum;
       });
-      if (espacioOcupado) { alert("⚠️ Acción denegada: Este espacio ya está ocupado por otro cliente. Por favor, arrastra a un recuadro disponible (+)."); return; }
+      if (espacioOcupado) { alert("⚠️ Acción denegada: Este espacio ya está ocupado por otro cliente. Por favor, arrastra a un recuadro disponible (+).");
+      return; }
 
       if (cita.horario && cita.horario.trim().toLowerCase().indexOf("disponibilidad") === -1) {
          const horarioDuplicado = baseDatosGoogle.some(function(c) {
             return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.horario && c.horario.trim().toLowerCase() === cita.horario.trim().toLowerCase() && c.rowNum != cita.rowNum;
          });
-         if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + cita.horario + "' ya está asignado a la cuadrilla '" + nuevaCuadrilla + "'. Movimiento cancelado."); return; }
+         if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + cita.horario + "' ya está asignado a la cuadrilla '" + nuevaCuadrilla + "'. Movimiento cancelado.");
+         return; }
       }
       
       cita.tecnico = nuevaCuadrilla;
@@ -1419,9 +1408,11 @@
           let el = formElements[i];
           if (el.type === 'button' || el.type === 'submit' || el.type === 'hidden') continue;
           if (camposPermitidosTecnico.indexOf(el.id) === -1) {
-              el.readOnly = true; if(el.tagName === 'SELECT') el.disabled = true; el.classList.add('campo-bloqueado');
+              el.readOnly = true;
+              if(el.tagName === 'SELECT') el.disabled = true; el.classList.add('campo-bloqueado');
           } else {
-              el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado');
+              el.readOnly = false;
+              el.disabled = false; el.classList.remove('campo-bloqueado');
           }
       }
     }
@@ -1429,11 +1420,13 @@
     function desbloquearCamposFormulario() {
       const formElements = document.getElementById('formularioAgenda').elements;
       for(let i=0; i<formElements.length; i++) {
-          let el = formElements[i]; el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado');
+          let el = formElements[i];
+          el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado');
       }
     }
 
-    function cambioDeFechaFiltro() { renderizarAgenda(); }
+    function cambioDeFechaFiltro() { renderizarAgenda();
+    }
     
     function modificarEspacios(fecha, cuadrilla, operacion) {
       if (!espaciosPorFecha[fecha]) espaciosPorFecha[fecha] = {};
@@ -1452,16 +1445,144 @@
       window.cuadrillasManuales = window.cuadrillasManuales || {};
       if (!window.cuadrillasManuales[fechaActual]) window.cuadrillasManuales[fechaActual] = {};
       window.cuadrillasManuales[fechaActual][nueva] = true;
-      if (window.cuadrillasOcultas && window.cuadrillasOcultas[fechaActual]) { delete window.cuadrillasOcultas[fechaActual][nueva]; }
+      if (window.cuadrillasOcultas && window.cuadrillasOcultas[fechaActual]) { delete window.cuadrillasOcultas[fechaActual][nueva];
+      }
       safeStorage.setItem('espacios_por_fecha_v4', JSON.stringify(espaciosPorFecha)); renderizarAgenda();
       input.value = '';
     }
 
     function gestionarLista(configKey, titulo) {
        let lista = [];
-       try { let d = safeStorage.getItem(configKey); if(d) lista = JSON.parse(d); } catch(e){}
+       try { let d = safeStorage.getItem(configKey); if(d) lista = JSON.parse(d);
+       } catch(e){}
        let nuevaLista = prompt("Editar " + titulo + " (separa las opciones por comas):", lista.join(", "));
        if(nuevaLista !== null) {
           let arr = nuevaLista.split(',').map(function(s) { 
               let val = s.trim(); if (configKey === 'config_lista_tecnicos') val = normalizarTecnico(val); return val;
-          }).filter(function(s) {
+          }).filter(function(s) { return s; });
+          safeStorage.setItem(configKey, JSON.stringify(arr)); poblarSelects();
+       }
+    }
+
+    let baseDatosCompletaAdmin = { headers: [], rows: [] };
+    function abrirVistaGeneralAdmin() {
+      if (rolUsuario !== 'admin') return;
+      document.getElementById('vistaAdminFiltros').classList.remove('hidden'); sincronizarVistaAdmin();
+    }
+    
+    function sincronizarVistaAdmin() {
+      const btn = document.getElementById('btnSincronizarAdminFiltros');
+      if (btn) btn.innerHTML = "⏳ Sincronizando...";
+      document.getElementById('cargandoTablaAdmin').classList.remove('hidden');
+      document.getElementById('tablaAdminCompleta').classList.add('hidden');
+      google.script.run.withSuccessHandler(function(response) {
+        if (btn) btn.innerHTML = "🔄 Sincronizar";
+        document.getElementById('cargandoTablaAdmin').classList.add('hidden');
+        document.getElementById('tablaAdminCompleta').classList.remove('hidden');
+        if (response.status === 'success') { baseDatosCompletaAdmin = response; construirTablaFiltrosAdmin(); } 
+        else { alert('Fallo de conexión en lectura completa: ' + response.message); }
+      }).obtenerTodoContenidoBaseDatos();
+    }
+
+    function cerrarVistaGeneralAdmin() { document.getElementById('vistaAdminFiltros').classList.add('hidden'); }
+
+    function construirTablaFiltrosAdmin() {
+      const thead = document.getElementById('tablaAdminHeader');
+      const tbody = document.getElementById('tablaAdminBody');
+      thead.innerHTML = ''; tbody.innerHTML = '';
+      if (!baseDatosCompletaAdmin.headers || baseDatosCompletaAdmin.headers.length === 0) return;
+      const filaTitulos = document.createElement('tr'); const filaFiltros = document.createElement('tr');
+      filaFiltros.className = "bg-slate-50 border-b border-slate-300";
+      baseDatosCompletaAdmin.headers.forEach((header, index) => {
+        const th = document.createElement('th');
+        th.className = "px-3 py-2.5 font-bold text-slate-700 whitespace-nowrap uppercase tracking-wider border-b border-slate-200 text-[11px]";
+        th.textContent = header; filaTitulos.appendChild(th);
+
+        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-slate-300";
+        if (header.toLowerCase().includes('fecha')) {
+          const divRange = document.createElement('div'); divRange.className = "flex flex-col gap-1 min-w-[110px]";
+          
+          const inputInicio = document.createElement('input'); inputInicio.type = "date"; inputInicio.id = `filtro_admin_col_${index}_inicio`; inputInicio.title = "Fecha Inicial"; inputInicio.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputInicio.addEventListener('input', ejecutarFiltrosAdmin);
+          const inputFin = document.createElement('input');
+          inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final";
+          inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
+          divRange.appendChild(inputInicio); divRange.appendChild(inputFin); thFiltro.appendChild(divRange);
+        } else {
+          const inputTexto = document.createElement('input'); inputTexto.type = "text";
+          inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin);
+          thFiltro.appendChild(inputTexto);
+        }
+        filaFiltros.appendChild(thFiltro);
+      });
+      thead.appendChild(filaTitulos); thead.appendChild(filaFiltros);
+      baseDatosCompletaAdmin.rows.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors"; tr.id = `fila_admin_raw_${rowIndex}`;
+        row.forEach((cellValue) => {
+          const td = document.createElement('td'); td.className = "px-3 py-2 whitespace-nowrap text-slate-600 max-w-[200px] truncate text-[11px]"; td.textContent = cellValue || ""; td.title = cellValue || ""; tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      document.getElementById('totalFilasMostradas').textContent = `Registros totales: ${baseDatosCompletaAdmin.rows.length}`;
+    }
+
+    function ejecutarFiltrosAdmin() {
+      const rowsData = baseDatosCompletaAdmin.rows;
+      let contadorVisibles = 0; const filtrosActivos = [];
+      for (let index = 0; index < baseDatosCompletaAdmin.headers.length; index++) {
+        const headerName = baseDatosCompletaAdmin.headers[index].toLowerCase();
+        if (headerName.includes('fecha')) {
+          filtrosActivos[index] = { tipo: 'fecha', inicio: document.getElementById(`filtro_admin_col_${index}_inicio`)?.value ||
+          "", fin: document.getElementById(`filtro_admin_col_${index}_fin`)?.value || "" };
+        } else {
+          const inputVal = document.getElementById(`filtro_admin_col_${index}`)?.value.toLowerCase().trim() ||
+          ""; let regex = null;
+          if (inputVal) { const queryEscapado = inputVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          regex = new RegExp("(^|[\\s\\W_])" + queryEscapado + "([\\s\\W_]|$)", "i"); }
+          filtrosActivos[index] = { tipo: 'texto', query: inputVal, regex: regex };
+        }
+      }
+
+      rowsData.forEach((row, rowIndex) => {
+        let cumpleFiltros = true;
+        for (let index = 0; index < row.length; index++) {
+          const filtro = filtrosActivos[index]; const cellValue = (row[index] || "").toString().toLowerCase().trim();
+          if (filtro.tipo === 'fecha') {
+            const cellDateStr = (row[index] || "").trim();
+       
+            if (cellDateStr) { if (filtro.inicio && cellDateStr < filtro.inicio) { cumpleFiltros = false; break; } if (filtro.fin && cellDateStr > filtro.fin) { cumpleFiltros = false; break; } } 
+            else if (filtro.inicio || filtro.fin) { cumpleFiltros = false; break; }
+          } else {
+            if (filtro.query) {
+              const esIgualDirecto = (cellValue === 
+              filtro.query);
+              if (!esIgualDirecto && filtro.regex && !filtro.regex.test(cellValue)) { cumpleFiltros = false; break; }
+            }
+          }
+        }
+        const elemFila = document.getElementById(`fila_admin_raw_${rowIndex}`);
+        if (elemFila) { if (cumpleFiltros) { elemFila.classList.remove('hidden'); contadorVisibles++; } else { elemFila.classList.add('hidden'); } }
+      });
+      document.getElementById('totalFilasMostradas').textContent = `Registros filtrados: ${contadorVisibles} de ${rowsData.length}`;
+    }
+  </script>
+<div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
+  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+    <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+      <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
+      <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
+    </div>
+    
+    <div class="p-4 border-b border-slate-200 bg-slate-50">
+      <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
+    
+      <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div class="p-6 overflow-y-auto flex-1">
+      <div id="listaClientesSimilares" class="space-y-3">
+        </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
