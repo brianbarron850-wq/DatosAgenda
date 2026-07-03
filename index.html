@@ -354,7 +354,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbwdJy3ZwpBvmVT63149StiLh9wmc48tDpzokUiEDH6D9ZBzMKbNG1pzBDFsADbdR3SEIw/exec"; 
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxgHRRewfucsJqPTxbf10juHj6pwbIKY3LdO0uJlOHEnB7tqa_qqqk-C2m3P7Y7NRtx/exec"; 
 
     if (typeof google === 'undefined') {
       window.google = {
@@ -405,7 +405,7 @@
         removeItem: function(key) { try { sessionStorage.removeItem(key); } catch(e) { delete this.mem[key]; } }
     };
 
-   const tecnicosPorDefecto = ["Cuadrilla 1", "Cuadrilla 2", "Cuadrilla 3", "Cuadrilla 4", "IVAN", "EURIEL", "JOSE", "ULISES" ];
+   const tecnicosPorDefecto = ["Cuadrilla 1", "Cuadrilla 2", "Cuadrilla 3", "Cuadrilla 4", "IVAN", "EURIEL", "JOSE", "ULISES", "EDGAR" ];
     const motivosPorDefecto = ["Instalación", "Soporte", "Cambio de Domicilio", "Desinstalación", "Sop/Des", "Des/Sop", "Migracion", "Reactivacion", "CAT" ];
     const horariosPorDefecto = ["09:00am", "09:30am", "10:00am", "10:30", "11:00am", "11:30am", "Antes de las 12pm", "12:00pm", "12:30pm","Despues de las 12pm", "01:00pm", "01:30pm", "02:00pm", "02:30pm","Antes de las 3pm", "03:00pm", "03:30pm", "Despues de las 3pm", "04:00pm", "04:30pm", "05:00pm", "05:30pm", "Despues de las 6pm", "Disponibilidad"];
     const agentesPorDefecto = ["Denise", "Jenni", "Luz", "Luis", "Brian", "Fernando", "Laura", "Mario", "Jaime", "Kennya"];
@@ -913,14 +913,54 @@
               if (cita) {
                   let motivoText = (cita.motivo || "").toLowerCase();
                   
+                  // ====== APLICACIÓN DE LA NUEVA LÓGICA DE COLORES Y BADGES ======
                   let serealizoVal = (cita.serealizo || "").toString().trim().toLowerCase();
-                  let isRealizado = (serealizoVal === 'sí' || serealizoVal === 'si');
                   let colorClass = "border-slate-300 bg-white hover:border-indigo-400 text-slate-800"; 
-                  
-                  if (isRealizado) { colorClass = "border-emerald-500 bg-emerald-50 hover:bg-emerald-100 text-emerald-900"; } 
-                  else if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; } 
-                  else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; } 
-                  else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900"; }
+                  let badgeHtml = '';
+                  let extraTitleMargin = '';
+                  let hasCustomStatus = true;
+
+                  if (serealizoVal === 'sí' || serealizoVal === 'si') { 
+                      colorClass = "border-emerald-500 bg-emerald-50 hover:bg-emerald-100 text-emerald-900"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Realizado</div>';
+                      extraTitleMargin = 'mt-5';
+                  } 
+                  else if (serealizoVal === 'no') { 
+                      colorClass = "border-rose-400 bg-rose-50 hover:bg-rose-100 text-rose-900"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-rose-400 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">No Realizado</div>';
+                      extraTitleMargin = 'mt-5';
+                  }
+                  else if (serealizoVal === 'pendiente') { 
+                      colorClass = "border-slate-400 bg-slate-100 hover:bg-slate-200 text-slate-800"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-slate-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Pendiente</div>';
+                      extraTitleMargin = 'mt-5';
+                  }
+                  else if (serealizoVal === 'cancelado' || serealizoVal === 'cancelo') { 
+                      colorClass = "border-red-600 bg-red-100 hover:bg-red-200 text-red-900"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Cancelado</div>';
+                      extraTitleMargin = 'mt-5';
+                  }
+                  else if (serealizoVal === 'reagendar') { 
+                      colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Reagendar</div>';
+                      extraTitleMargin = 'mt-5';
+                  }
+                  else if (serealizoVal === 'reagendo') { 
+                      colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; 
+                      badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Reagendo</div>';
+                      extraTitleMargin = 'mt-5';
+                  }
+                  else {
+                      hasCustomStatus = false;
+                  }
+
+                  // Fallback: si no tiene un estatus asignado, lo pintamos basado en el Motivo de la cita
+                  if (!hasCustomStatus) {
+                      if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; } 
+                      else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; } 
+                      else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900"; }
+                  }
+                  // ==============================================================
 
                   let urlMaps = cita.coordenadasoentrecalles ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
                   let coordsHtml = cita.coordenadasoentrecalles ? '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
@@ -946,9 +986,6 @@
                       '</div>';
                   }
                   
-                  let badgeHtml = isRealizado ? '<div class="absolute top-2 left-2 text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Realizado</div>' : '';
-                  let extraTitleMargin = isRealizado ? 'mt-5' : '';
-
                   htmlCol += '<div class="slot-card border-l-4 ' + colorClass + ' p-3 rounded-lg shadow-sm cursor-pointer transition-colors relative" ' +
                            'draggable="true" ' +
                            'ondragstart="dragStart(event, ' + cita.rowNum + ')" ' +
