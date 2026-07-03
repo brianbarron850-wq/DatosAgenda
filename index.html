@@ -42,7 +42,7 @@
   <div id="modalLogin" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-[100]">
     <div class="bg-white p-8 rounded-xl shadow-xl max-w-sm w-full text-center">
       <h2 class="text-2xl font-black mb-2 text-slate-800">Acceso al Sistema</h2>
-      <p class="text-sm text-slate-500 mb-6">Ingresa tu contraseña de seguridad para continuar.</p>
+      <p class="text-sm text-slate-500 mb-6">Ingresa tu PIN de seguridad para continuar.</p>
       <input type="password" id="inputPin" onkeyup="if(event.key === 'Enter') verificarPin()" placeholder="••••" class="w-full border border-slate-300 rounded-lg p-3 text-center text-3xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6 font-mono">
       <button id="btnLogin" onclick="verificarPin()" type="button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
         Ingresar
@@ -291,14 +291,17 @@
               <input type="text" id="form_reportetecnico">
           </div>
 
-          <div class="md:col-span-2 mt-4 flex gap-3 justify-end border-t border-slate-200 pt-4">
-            <button type="button" id="btnEliminarRegistro" onclick="eliminarRegistroBD()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
-               🗑️ Eliminar Registro
+          <div class="md:col-span-2 mt-4 flex gap-2 justify-end border-t border-slate-200 pt-4 flex-wrap">
+            <button type="button" id="btnEliminarRegistro" onclick="eliminarRegistroBD()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+               🗑️ Eliminar
             </button>
-            <button type="button" onclick="cerrarModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">
+            <button type="button" id="btnDuplicarRegistro" onclick="duplicarRegistroBD()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+               📋 Duplicar
+            </button>
+            <button type="button" onclick="cerrarModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">
               Cancelar
             </button>
-            <button type="submit" id="btnGuardarRegistro" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
+            <button type="submit" id="btnGuardarRegistro" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
               Guardar Cambios
             </button>
           </div>
@@ -1086,7 +1089,9 @@
       let valorExacto = asegurarOpcionSelect('form_tecnico', cuadrilla);
       document.getElementById('form_tecnico').value = valorExacto;
       document.getElementById('modalTitulo').innerText = "Nuevo Registro - " + cuadrilla;
+      
       document.getElementById('btnEliminarRegistro').classList.add('hidden');
+      document.getElementById('btnDuplicarRegistro').classList.add('hidden');
       
       desbloquearCamposFormulario();
       verificarMotivo();
@@ -1123,9 +1128,11 @@
       
       if(rolUsuario === 'admin') {
           document.getElementById('btnEliminarRegistro').classList.remove('hidden');
+          document.getElementById('btnDuplicarRegistro').classList.remove('hidden');
           desbloquearCamposFormulario();
       } else {
           document.getElementById('btnEliminarRegistro').classList.add('hidden');
+          document.getElementById('btnDuplicarRegistro').classList.add('hidden');
           bloquearCamposParaTecnico();
       }
       
@@ -1217,6 +1224,79 @@
             })
             .guardarRegistroAgenda(datosPayload);
       }
+    }
+
+    function duplicarRegistroBD() {
+       const rowNum = document.getElementById('form_rownum').value;
+       if(!rowNum) return;
+       
+       let nuevaFecha = prompt("Ingresa la fecha para duplicar el registro (Formato: YYYY-MM-DD):", document.getElementById('filtroFecha').value);
+       if (!nuevaFecha) return;
+       
+       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+       if (!dateRegex.test(nuevaFecha)) {
+           alert("Formato de fecha inválido. Por favor, utiliza el formato YYYY-MM-DD.");
+           return;
+       }
+       
+       if (!confirm("¿Estás seguro de duplicar este registro exacto para el día " + nuevaFecha + "?")) return;
+       
+       let inputTecnico = document.getElementById('form_tecnico').value;
+       let cuadrillaOriginal = document.getElementById('form_cuadrilla').value;
+       if (!inputTecnico || inputTecnico.trim() === "") { inputTecnico = cuadrillaOriginal; }
+       const tecnico = normalizarTecnico(inputTecnico);
+       
+       let esp = 1;
+       while (baseDatosGoogle.some(function(c) { return c.fecha === nuevaFecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp; })) { 
+           esp++; 
+       }
+       let espacioFinal = esp;
+       
+       const btn = document.getElementById('btnDuplicarRegistro');
+       const textOriginal = btn.innerHTML;
+       btn.innerHTML = "⏳ Duplicando..."; btn.disabled = true;
+       
+       let citaOriginal = baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; });
+       let datosPayload = citaOriginal ? Object.assign({}, citaOriginal) : {};
+       
+       datosPayload.rowNum = "";
+       datosPayload.fecha = nuevaFecha;
+       datosPayload.tecnico = tecnico;
+       datosPayload.espacio = espacioFinal;
+       datosPayload.usuario_movimiento = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
+       
+       const mapeoForm = {
+          'motivo': 'form_motivo', 'horario': 'form_horario', 'nombredelcliente': 'form_nombredelcliente',
+          'linkCliente': 'form_link_cliente', 'telefono': 'form_telefono', 'ip': 'form_ip',
+          'calleynumero': 'form_calleynumero', 'coloniaofracc': 'form_coloniaofracc', 'coordenadasoentrecalles': 'form_coordenadasoentrecalles',
+          'calleynumero2': 'form_calleynumero2', 'coloniaofracc2': 'form_coloniaofracc2', 'coordenadasoentrecalles2': 'form_coordenadasoentrecalles2',
+          'agente': 'form_agente', 'plan': 'form_plan', 'confirmada': 'form_confirmada',
+          'serealizo': 'form_serealizo', 'yafuecliente': 'form_yafuecliente', 'bienvenida': 'form_bienvenida',
+          'pormediosediocuentadenosotros': 'form_pormediosediocuentadenosotros', 'otroscual': 'form_otroscual',
+          'monto': 'form_monto', 'comentarios': 'form_comentarios', 'comentarioscat': 'form_comentarioscat',
+          'comentariosdeltecnico': 'form_comentariosdeltecnico', 'reportetecnico': 'form_reportetecnico'
+       };
+       for (let prop in mapeoForm) {
+           let el = document.getElementById(mapeoForm[prop]);
+           if(el) datosPayload[prop] = el.value;
+       }
+       
+       if (typeof google !== 'undefined' && google.script && google.script.run) {
+           google.script.run
+             .withSuccessHandler(function(res) {
+                if(res.status === 'success') { 
+                    alert("¡Registro duplicado exitosamente para la fecha " + nuevaFecha + "!");
+                    cerrarModal(); 
+                    sincronizarDatos(); 
+                } else { alert("Error: " + res.message); }
+                btn.innerHTML = textOriginal; btn.disabled = false;
+             })
+             .withFailureHandler(function(err) {
+                alert("Error de conexión: " + err);
+                btn.innerHTML = textOriginal; btn.disabled = false;
+             })
+             .guardarRegistroAgenda(datosPayload);
+       }
     }
 
     function eliminarRegistroBD() {
@@ -1384,119 +1464,4 @@
        if(nuevaLista !== null) {
           let arr = nuevaLista.split(',').map(function(s) { 
               let val = s.trim(); if (configKey === 'config_lista_tecnicos') val = normalizarTecnico(val); return val;
-          }).filter(function(s) { return s; });
-          safeStorage.setItem(configKey, JSON.stringify(arr)); poblarSelects();
-       }
-    }
-
-    let baseDatosCompletaAdmin = { headers: [], rows: [] };
-    function abrirVistaGeneralAdmin() {
-      if (rolUsuario !== 'admin') return;
-      document.getElementById('vistaAdminFiltros').classList.remove('hidden'); sincronizarVistaAdmin();
-    }
-    
-    function sincronizarVistaAdmin() {
-      const btn = document.getElementById('btnSincronizarAdminFiltros');
-      if (btn) btn.innerHTML = "⏳ Sincronizando...";
-      document.getElementById('cargandoTablaAdmin').classList.remove('hidden');
-      document.getElementById('tablaAdminCompleta').classList.add('hidden');
-      google.script.run.withSuccessHandler(function(response) {
-        if (btn) btn.innerHTML = "🔄 Sincronizar";
-        document.getElementById('cargandoTablaAdmin').classList.add('hidden');
-        document.getElementById('tablaAdminCompleta').classList.remove('hidden');
-        if (response.status === 'success') { baseDatosCompletaAdmin = response; construirTablaFiltrosAdmin(); } 
-        else { alert('Fallo de conexión en lectura completa: ' + response.message); }
-      }).obtenerTodoContenidoBaseDatos();
-    }
-
-    function cerrarVistaGeneralAdmin() { document.getElementById('vistaAdminFiltros').classList.add('hidden'); }
-
-    function construirTablaFiltrosAdmin() {
-      const thead = document.getElementById('tablaAdminHeader'); const tbody = document.getElementById('tablaAdminBody');
-      thead.innerHTML = ''; tbody.innerHTML = '';
-      if (!baseDatosCompletaAdmin.headers || baseDatosCompletaAdmin.headers.length === 0) return;
-      const filaTitulos = document.createElement('tr'); const filaFiltros = document.createElement('tr');
-      filaFiltros.className = "bg-slate-50 border-b border-slate-300";
-
-      baseDatosCompletaAdmin.headers.forEach((header, index) => {
-        const th = document.createElement('th');
-        th.className = "px-3 py-2.5 font-bold text-slate-700 whitespace-nowrap uppercase tracking-wider border-b border-slate-200 text-[11px]";
-        th.textContent = header; filaTitulos.appendChild(th);
-
-        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-slate-300";
-        if (header.toLowerCase().includes('fecha')) {
-          const divRange = document.createElement('div'); divRange.className = "flex flex-col gap-1 min-w-[110px]";
-          const inputInicio = document.createElement('input'); inputInicio.type = "date"; inputInicio.id = `filtro_admin_col_${index}_inicio`; inputInicio.title = "Fecha Inicial"; inputInicio.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputInicio.addEventListener('input', ejecutarFiltrosAdmin);
-          const inputFin = document.createElement('input'); inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final"; inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
-          divRange.appendChild(inputInicio); divRange.appendChild(inputFin); thFiltro.appendChild(divRange);
-        } else {
-          const inputTexto = document.createElement('input'); inputTexto.type = "text"; inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin); thFiltro.appendChild(inputTexto);
-        }
-        filaFiltros.appendChild(thFiltro);
-      });
-      thead.appendChild(filaTitulos); thead.appendChild(filaFiltros);
-      
-      baseDatosCompletaAdmin.rows.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors"; tr.id = `fila_admin_raw_${rowIndex}`;
-        row.forEach((cellValue) => {
-          const td = document.createElement('td'); td.className = "px-3 py-2 whitespace-nowrap text-slate-600 max-w-[200px] truncate text-[11px]"; td.textContent = cellValue || ""; td.title = cellValue || ""; tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      document.getElementById('totalFilasMostradas').textContent = `Registros totales: ${baseDatosCompletaAdmin.rows.length}`;
-    }
-
-    function ejecutarFiltrosAdmin() {
-      const rowsData = baseDatosCompletaAdmin.rows; let contadorVisibles = 0; const filtrosActivos = [];
-      for (let index = 0; index < baseDatosCompletaAdmin.headers.length; index++) {
-        const headerName = baseDatosCompletaAdmin.headers[index].toLowerCase();
-        if (headerName.includes('fecha')) {
-          filtrosActivos[index] = { tipo: 'fecha', inicio: document.getElementById(`filtro_admin_col_${index}_inicio`)?.value || "", fin: document.getElementById(`filtro_admin_col_${index}_fin`)?.value || "" };
-        } else {
-          const inputVal = document.getElementById(`filtro_admin_col_${index}`)?.value.toLowerCase().trim() || ""; let regex = null;
-          if (inputVal) { const queryEscapado = inputVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); regex = new RegExp("(^|[\\s\\W_])" + queryEscapado + "([\\s\\W_]|$)", "i"); }
-          filtrosActivos[index] = { tipo: 'texto', query: inputVal, regex: regex };
-        }
-      }
-
-      rowsData.forEach((row, rowIndex) => {
-        let cumpleFiltros = true;
-        for (let index = 0; index < row.length; index++) {
-          const filtro = filtrosActivos[index]; const cellValue = (row[index] || "").toString().toLowerCase().trim();
-          if (filtro.tipo === 'fecha') {
-            const cellDateStr = (row[index] || "").trim();
-            if (cellDateStr) { if (filtro.inicio && cellDateStr < filtro.inicio) { cumpleFiltros = false; break; } if (filtro.fin && cellDateStr > filtro.fin) { cumpleFiltros = false; break; } } 
-            else if (filtro.inicio || filtro.fin) { cumpleFiltros = false; break; }
-          } else {
-            if (filtro.query) {
-              const esIgualDirecto = (cellValue === filtro.query);
-              if (!esIgualDirecto && filtro.regex && !filtro.regex.test(cellValue)) { cumpleFiltros = false; break; }
-            }
-          }
-        }
-        const elemFila = document.getElementById(`fila_admin_raw_${rowIndex}`);
-        if (elemFila) { if (cumpleFiltros) { elemFila.classList.remove('hidden'); contadorVisibles++; } else { elemFila.classList.add('hidden'); } }
-      });
-      document.getElementById('totalFilasMostradas').textContent = `Registros filtrados: ${contadorVisibles} de ${rowsData.length}`;
-    }
-  </script>
-<div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
-  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-    <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-      <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
-      <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
-    </div>
-    
-    <div class="p-4 border-b border-slate-200 bg-slate-50">
-      <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
-      <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-    </div>
-
-    <div class="p-6 overflow-y-auto flex-1">
-      <div id="listaClientesSimilares" class="space-y-3">
-        </div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
+          }).filter(function(s) {
