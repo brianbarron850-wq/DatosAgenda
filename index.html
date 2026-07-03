@@ -48,7 +48,7 @@
   <div id="modalLogin" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-[100]">
     <div class="bg-white p-8 rounded-xl shadow-xl max-w-sm w-full text-center">
       <h2 class="text-2xl font-black mb-2 text-slate-800">Acceso al Sistema</h2>
-      <p class="text-sm text-slate-500 mb-6">Ingresa tu PIN de seguridad para continuar.</p>
+      <p class="text-sm text-slate-500 mb-6">Ingresa tu contraseña de seguridad para continuar.</p>
       <input type="password" id="inputPin" onkeyup="if(event.key === 'Enter') verificarPin()" placeholder="••••" class="w-full border border-slate-300 rounded-lg p-3 text-center text-3xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6 font-mono">
       <button id="btnLogin" onclick="verificarPin()" type="button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
         Ingresar
@@ -364,7 +364,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxSoNQrJadNPmIWfZxshv854GNczWSdrPOXn0rpYM7mAiIub53ssIunD8-GlIuN_JXS/exec";
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbwuO7Fe9sgT5tY1jIm07yC445esRV_XNa54MPYB9sJJG9y513_Cbb9UbtNiitZ7T-JVKA/exec";
     if (typeof google === 'undefined') {
       window.google = {
         script: {
