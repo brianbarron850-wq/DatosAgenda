@@ -5,40 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Agenda Dinámica</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .slot-card { transition: all 0.2s ease;
-    }
-    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2;
-    }
-    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105;
-    }
-    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80;
-    }
+    .slot-card { transition: all 0.2s ease; }
+    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2; }
+    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105; }
+    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80; }
   </style>
   <script>
     // ==========================================
     // BLOQUEO DE INSPECCIÓN Y CLIC DERECHO
     // ==========================================
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        return false;
-      }
+      if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
       if (e.ctrlKey) {
-        if (e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) {
-          e.preventDefault();
-          return false;
-        }
-      
-        if (e.key.toLowerCase() === 'u') {
-          e.preventDefault();
-          return false;
-        }
+        if (e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) { e.preventDefault(); return false; }
+        if (e.key.toLowerCase() === 'u') { e.preventDefault(); return false; }
       }
     });
   </script>
@@ -92,6 +76,9 @@
             </button>
             <button onclick="abrirVistaGeneralAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
               📊 Vista General
+            </button>
+            <button onclick="abrirDashboard()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition-colors shadow-sm ml-2 flex items-center gap-1">
+              📈 Datos
             </button>
           </div>
         </div>
@@ -350,13 +337,71 @@
     </div>
     <div class="flex-1 p-6 overflow-auto">
       <div id="cargandoTablaAdmin" class="text-center text-slate-500 py-10 font-bold">Recuperando registros desde Google Sheets...</div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-auto">
-        <table class="min-w-full text-left text-xs border-collapse hidden" id="tablaAdminCompleta">
-          <thead class="bg-slate-100 text-slate-700 sticky top-0 shadow-sm" id="tablaAdminHeader"></thead>
-          <tbody id="tablaAdminBody" class="divide-y divide-slate-200"></tbody>
+      <div class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-auto">
+        <table class="min-w-full text-left text-sm border-collapse hidden" id="tablaAdminCompleta">
+          <thead class="bg-indigo-50 text-indigo-900 sticky top-0 shadow-sm" id="tablaAdminHeader"></thead>
+          <tbody id="tablaAdminBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
       <div class="mt-4 text-right text-xs font-semibold text-slate-500" id="totalFilasMostradas"></div>
+    </div>
+  </div>
+
+  <div id="vistaDashboardFiltros" class="hidden fixed inset-0 bg-slate-50 z-[110] overflow-auto flex flex-col">
+    <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+      <div>
+         <h2 class="text-xl font-bold">Dashboard Analítico (Esta_Gral)</h2>
+         <p class="text-xs text-indigo-200 mt-1">Análisis visual moderno de datos operativos.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btnSincronizarDashboard" onclick="sincronizarDashboard()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+          🔄 Actualizar Datos
+        </button>
+        <button onclick="cerrarDashboard()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-sm">
+           Volver a la Agenda
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 p-6 overflow-auto">
+      <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+         </div>
+    </div>
+  </div>
+
+  <div id="modalDetalleDashboard" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
+    <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center sticky top-0">
+        <h3 id="dashModalTitulo" class="font-black text-xl text-indigo-800"></h3>
+        <button type="button" onclick="cerrarModalDashboard()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1 bg-slate-50 space-y-6">
+         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-x-auto">
+             <table class="min-w-full text-left text-sm border-collapse" id="dashModalTablaElem">
+                <thead class="bg-indigo-50 text-indigo-900 border-b border-indigo-100" id="dashModalTablaHead"></thead>
+                <tbody class="divide-y divide-slate-100" id="dashModalTablaBody"></tbody>
+             </table>
+         </div>
+         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 h-[400px] flex items-center justify-center relative">
+             <canvas id="dashModalCanvas"></canvas>
+         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
+    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+      <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
+        <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
+      </div>
+      
+      <div class="p-4 border-b border-slate-200 bg-slate-50">
+        <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
+        <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <div id="listaClientesSimilares" class="space-y-3"></div>
+      </div>
     </div>
   </div>
 
@@ -364,7 +409,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbyVZHryqNJvBWoZ33OtuyQXUxiDH3GGgaA8Z_nS5-e-IX5cvT4W0-yvLWQtgWGdniZO/exec";
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxyVeGbDZUQCj6RpiUBK0baYDZ_pXsAv45rfKra5_RbjZtj3T4Ry7DeDOo7pvQgMNbX/exec";
     if (typeof google === 'undefined') {
       window.google = {
         script: {
@@ -394,7 +439,8 @@
             guardarRegistroAgenda: function(d) { this._call('guardarRegistroAgenda', [d]); },
             eliminarRegistroAgenda: function(r, u) { this._call('eliminarRegistroAgenda', [r, u]); },
             renombrarCuadrillaBD: function(v, n, f) { this._call('renombrarCuadrillaBD', [v, n, f]); }, 
-            obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); }
+            obtenerTodoContenidoBaseDatos: function() { this._call('obtenerTodoContenidoBaseDatos', []); },
+            obtenerDatosDashboard: function() { this._call('obtenerDatosDashboard', []); }
           }
         }
       };
@@ -423,7 +469,6 @@
     const yafueclientePorDefecto = ["No", "Sí"];
     const bienvenidaPorDefecto = ["Sí", "No", "Pendiente"];
     const mediosPorDefecto = ["Amigo/Familiar", "Facebook", "Radio", "Es cliente", "No contesto", "Rotulo", "Recomendación", "Folleto", "Página Web", "Otros"];
-    // PERMISOS DE TÉCNICOS ACORDES A ESTRUCTURA SOLICITADA
     const camposPermitidosTecnico = [
       'form_ip',
       'form_coordenadasoentrecalles',
@@ -436,6 +481,23 @@
     let rolUsuario = null;
     let autoSyncInterval = null;
     window.isDragging = false;
+    
+    // CONFIGURACIÓN DE LAS TABLAS DEL DASHBOARD
+    const configTablas = {
+        tabla1: { titulo: "Instalaciones", tipo: "bar", labelsCol: true },
+        tabla2: { titulo: "Paquetes", tipo: "bar", labelsCol: true },
+        tabla3: { titulo: "¿Por qué medio se dio cuenta de nosotros?", tipo: "pie", labelsCol: true },
+        tabla4: { titulo: "Soportes", tipo: "bar", labelsCol: true },
+        tabla5: { titulo: "Motivos de soportes", tipo: "bar", labelsCol: true },
+        tabla6: { titulo: "Cambio de domicilio", tipo: "bar", labelsCol: true },
+        tabla7: { titulo: "Desinstalaciones", tipo: "bar", labelsCol: true },
+        tabla8: { titulo: "Estatus cliente desinstalaciones", tipo: "bar", esColumnar: true, colLabel: "Motivo", colsData: ["Agendado", "Realizado"] },
+        tabla9: { titulo: "Motivo desinstalación", tipo: "bar", labelsCol: true },
+        tabla10: { titulo: "Desinstalaciones año contratado", tipo: "line", labelsCol: true }
+    };
+    let datosDashboardGral = null;
+    let chartInstance = null;
+
     function normalizarTecnico(texto) {
         if (!texto) return "";
         return texto.toString().trim().toLowerCase().split(/\s+/).map(function(w){
@@ -469,15 +531,12 @@
           }
       } catch (errorFalla) {
           const m = document.getElementById('msgErrorPin');
-          if (m) {
-            m.innerText = "Error inicializando la app: " + errorFalla.message;
-            m.classList.remove('hidden');
-          }
+          if (m) { m.innerText = "Error inicializando la app: " + errorFalla.message; m.classList.remove('hidden'); }
       }
     };
-    // Rastreo de drag para no interrumpir el sync automático
+
     document.addEventListener('dragend', function() { window.isDragging = false; });
-    // FUNCION DE VERIFICACION REDISEÑADA PARA EVITAR CONGELAMIENTO
+
     function verificarPin() {
       try {
           const pinInput = document.getElementById('inputPin');
@@ -521,8 +580,7 @@
           }
       } catch (e) {
           const err = document.getElementById('msgErrorPin');
-          if (err) { err.innerText = "Error local: " + e.message; err.classList.remove('hidden');
-          }
+          if (err) { err.innerText = "Error local: " + e.message; err.classList.remove('hidden'); }
           document.getElementById('btnLogin').innerHTML = "Ingresar";
           document.getElementById('btnLogin').disabled = false;
       }
@@ -559,9 +617,6 @@
       btn.disabled = false;
     }
 
-    // ==========================================
-    // SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO
-    // ==========================================
     function iniciarSincronizacionAutomatica() {
       if(autoSyncInterval) clearInterval(autoSyncInterval);
       autoSyncInterval = setInterval(sincronizarDatosSilencioso, 10000); // 10 segundos
@@ -584,7 +639,6 @@
                 let modalAbierto = !document.getElementById('modalRegistro').classList.contains('hidden');
                 let wispAbierto = !document.getElementById('modalWisphubSeleccion').classList.contains('hidden');
                 
-                // Renderizamos sólo si el usuario no tiene pantallas activas y no está moviendo cartas
                 if (!modalAbierto && !wispAbierto && !window.isDragging) {
                     renderizarAgenda();
                 }
@@ -594,9 +648,6 @@
       }
     }
 
-    // ==========================================
-    // MANEJO DE VISTAS DINÁMICAS Y WISPHUB
-    // ==========================================
     function verificarMotivo() {
         var motivo = document.getElementById('form_motivo').value.toLowerCase();
         var contenedorCambio = document.getElementById('contenedor_cambio_domicilio');
@@ -614,8 +665,7 @@
       const inputIdElement = document.getElementById('form_id_wisphub');
       const idInput = inputIdElement ? inputIdElement.value.trim() : "";
       
-      if (nombreInput === "" && idInput === "") { alert("Por favor, ingresa el Nombre o el ID del cliente para buscar en WispHub.");
-      return; }
+      if (nombreInput === "" && idInput === "") { alert("Por favor, ingresa el Nombre o el ID del cliente para buscar en WispHub."); return; }
       
       const btn = ev.currentTarget || document.querySelector('button[title="Buscar en WispHub"]');
       const originalText = btn.innerHTML;
@@ -636,8 +686,7 @@
             alert("Error al intentar conectar con WispHub: " + err);
           })
           .buscarClienteWispHub(nombreInput, idInput);
-      } else { btn.innerHTML = originalText; btn.disabled = false; alert("Entorno local detectado. Requiere despliegue de Apps Script.");
-      }
+      } else { btn.innerHTML = originalText; btn.disabled = false; alert("Entorno local detectado. Requiere despliegue de Apps Script."); }
     }
 
     function llenarCamposClienteWisp(data) {
@@ -666,16 +715,11 @@
           let estado = (data.estado || "Desconocido").toUpperCase();
           badge.innerText = estado;
           badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
-          if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
-          } 
-          else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
-          } 
-          else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300');
-          } 
-          else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
-          } 
-          else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300');
-          }
+          if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
+          else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
+          else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
+          else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); } 
+          else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300'); }
           contenedorBadge.classList.remove('hidden');
       }
     }
@@ -749,16 +793,11 @@
             let estado = (data.estado || "Desconocido").toUpperCase();
             badge.innerText = estado;
             badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
-            if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300');
-            } 
-            else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300');
-            } 
-            else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300');
-            } 
-            else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
-            } 
-            else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300');
-            }
+            if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
+            else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
+            else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
+            else if(estado === 'NUEVO' || estado === 'PENDIENTE') { badge.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300'); } 
+            else { badge.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-300'); }
             contenedorBadge.classList.remove('hidden');
         }
     }
@@ -780,8 +819,7 @@
     function renderizarListaWisphub(lista) {
         const contenedor = document.getElementById('listaClientesWisphub');
         contenedor.innerHTML = '';
-        if (lista.length === 0) { contenedor.innerHTML = '<div class="text-sm text-slate-500 text-center py-4 font-medium">No se encontraron registros con esa IP.</div>';
-        return; }
+        if (lista.length === 0) { contenedor.innerHTML = '<div class="text-sm text-slate-500 text-center py-4 font-medium">No se encontraron registros con esa IP.</div>'; return; }
         
         lista.forEach(function(c) {
             const div = document.createElement('div');
@@ -791,14 +829,12 @@
             let colorClase = estado === 'ACTIVO' ? 'bg-emerald-500' : (estado.includes('SUSPENDIDO') || estado === 'MOROSO' ? 'bg-rose-500' : 'bg-amber-500');
             div.innerHTML = '<div class="font-bold text-sm text-slate-800">' + (c.nombre || 'Sin nombre') + ' <span class="text-[10px] text-white ' + colorClase + ' px-1.5 py-0.5 rounded ml-1">' + estado + '</span></div>' +
                             '<div class="text-xs text-slate-600 mt-1.5">' + ipVisual + '📍 ' + (c.calleynumero || 'Sin dirección') + ' | 🏙️ ' + (c.colonia || 'Sin colonia') + '</div>';
-            div.onclick = function() { llenarFormularioWispHub(c); cerrarModalWisphub();
-            alert("¡Datos del cliente seleccionados y rellenados con éxito!"); };
+            div.onclick = function() { llenarFormularioWispHub(c); cerrarModalWisphub(); alert("¡Datos del cliente seleccionados y rellenados con éxito!"); };
             contenedor.appendChild(div);
         });
     }
 
-    function cerrarModalWisphub() { document.getElementById('modalWisphubSeleccion').classList.add('hidden');
-    }
+    function cerrarModalWisphub() { document.getElementById('modalWisphubSeleccion').classList.add('hidden'); }
 
     function sincronizarDatos() {
       const btn = document.getElementById('btnSincronizar');
@@ -830,9 +866,7 @@
 
       let cuadrillasHoy = [];
       baseDatosGoogle.forEach(function(c) {
-          if (c.fecha === fechaActual && c.tecnico && cuadrillasHoy.indexOf(c.tecnico) === -1) {
-              cuadrillasHoy.push(c.tecnico);
-          }
+          if (c.fecha === fechaActual && c.tecnico && cuadrillasHoy.indexOf(c.tecnico) === -1) { cuadrillasHoy.push(c.tecnico); }
       });
       cuadrillasHoy.forEach(function(tec) {
           let citasTec = baseDatosGoogle.filter(function(c) { return c.fecha === fechaActual && c.tecnico === tec; });
@@ -848,9 +882,9 @@
               if (horA > horB) return 1;
               return 0;
           });
-
           citasTec.forEach(function(cita, idx) { cita.espacio = idx + 1; });
       });
+      
       let cuadrillasDelDia = {};
       baseDatosGoogle.forEach(function(cita) {
           if (cita.fecha === fechaActual && cita.tecnico && !ocultasHoy[cita.tecnico]) {
@@ -858,12 +892,9 @@
                   let countAnterior = (espaciosPorFecha[fechaActual] && espaciosPorFecha[fechaActual][cita.tecnico]) ? espaciosPorFecha[fechaActual][cita.tecnico] : 4;
                   cuadrillasDelDia[cita.tecnico] = countAnterior;
               }
-              
               if (!cita.espacio || isNaN(parseInt(cita.espacio)) || parseInt(cita.espacio) <= 0) {
                   let esp = 1;
-                  while (baseDatosGoogle.some(function(c) { return c.fecha === fechaActual && c.tecnico === cita.tecnico && c.espacio == esp && c.rowNum != cita.rowNum; })) {
-                       esp++;
-                  }
+                  while (baseDatosGoogle.some(function(c) { return c.fecha === fechaActual && c.tecnico === cita.tecnico && c.espacio == esp && c.rowNum != cita.rowNum; })) { esp++; }
                   cita.espacio = esp;
               }
               let espNum = parseInt(cita.espacio);
@@ -871,16 +902,13 @@
           }
       });
       Object.keys(manualesHoy).forEach(function(tec) {
-          if (!cuadrillasDelDia[tec] && !ocultasHoy[tec]) {
-              cuadrillasDelDia[tec] = (espaciosPorFecha[fechaActual] && espaciosPorFecha[fechaActual][tec]) ? espaciosPorFecha[fechaActual][tec] : 4;
-          }
+          if (!cuadrillasDelDia[tec] && !ocultasHoy[tec]) { cuadrillasDelDia[tec] = (espaciosPorFecha[fechaActual] && espaciosPorFecha[fechaActual][tec]) ? espaciosPorFecha[fechaActual][tec] : 4; }
       });
       espaciosPorFecha[fechaActual] = cuadrillasDelDia;
       safeStorage.setItem('espacios_por_fecha_v4', JSON.stringify(espaciosPorFecha));
       
       const nombresCuadrillas = Object.keys(cuadrillasDelDia);
       
-      // FILTRO PARA ACCESO DE TÉCNICOS (Solo ven la suya)
       let cuadrillasVisibles = nombresCuadrillas;
       if (rolUsuario === 'tecnico') {
           let nombreTecnico = normalizarTecnico(safeSession.getItem('nombre_usuario'));
@@ -888,11 +916,8 @@
       }
       
       if (cuadrillasVisibles.length === 0) {
-          if (rolUsuario === 'tecnico') {
-             contenedor.innerHTML = '<p class="text-center text-slate-500 py-10 font-medium">No tienes ninguna cuadrilla asignada o no hay citas para ti en este día.</p>';
-          } else {
-             contenedor.innerHTML = '<p class="text-center text-slate-500 py-10 font-medium">No hay cuadrillas registradas para el día seleccionado.</p>';
-          }
+          if (rolUsuario === 'tecnico') { contenedor.innerHTML = '<p class="text-center text-slate-500 py-10 font-medium">No tienes ninguna cuadrilla asignada o no hay citas para ti en este día.</p>'; } 
+          else { contenedor.innerHTML = '<p class="text-center text-slate-500 py-10 font-medium">No hay cuadrillas registradas para el día seleccionado.</p>'; }
           return;
       }
       
@@ -918,11 +943,11 @@
           let htmlCol = '<div class="flex justify-between items-center bg-indigo-600 text-white p-2 rounded mb-3 shadow">' +
               '<h3 class="font-bold text-sm tracking-wide uppercase truncate w-full pl-1">' + cuadrilla + '</h3>' + btnRuta + adminControles +
           '</div><div class="space-y-3">';
+          
           for(let i = 1; i <= numEspacios; i++) {
               const cita = baseDatosGoogle.find(function(c) { return c.tecnico === cuadrilla && c.fecha === fechaActual && c.espacio == i; });
               if (cita) {
                   let motivoText = (cita.motivo || "").toLowerCase();
-                  // ====== APLICACIÓN DE LA NUEVA LÓGICA DE COLORES Y BADGES ======
                   let serealizoVal = (cita.serealizo || "").toString().trim().toLowerCase();
                   let colorClass = "border-slate-300 bg-white hover:border-indigo-400 text-slate-800"; 
                   let badgeHtml = '';
@@ -958,28 +983,18 @@
                       badgeHtml = '<div class="absolute top-2 left-2 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-wider shadow-sm">Reagendo</div>';
                       extraTitleMargin = 'mt-5';
                   }
-                  else {
-                      hasCustomStatus = false;
-                  }
+                  else { hasCustomStatus = false; }
 
-                  // Fallback: si no tiene un estatus asignado, lo pintamos basado en el Motivo de la cita
                   if (!hasCustomStatus) {
-                      if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900";
-                      } 
-                      else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900";
-                      } 
-                      else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900";
-                      }
+                      if (motivoText.indexOf("instalación") > -1 || motivoText.indexOf("instalacion") > -1 || motivoText.indexOf("cambio de domicilio") > -1) { colorClass = "border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900"; } 
+                      else if (motivoText.indexOf("soporte") > -1) { colorClass = "border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900"; } 
+                      else if (motivoText.indexOf("desinstalación") > -1 || motivoText.indexOf("desinstalacion") > -1) { colorClass = "border-red-500 bg-red-50 hover:bg-red-100 text-red-900"; }
                   }
-                  // ==============================================================
 
-                  let urlMaps = cita.coordenadasoentrecalles ?
-                  "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
-                  let coordsHtml = cita.coordenadasoentrecalles ?
-                  '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
+                  let urlMaps = cita.coordenadasoentrecalles ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
+                  let coordsHtml = cita.coordenadasoentrecalles ? '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
                   let urlMaps2 = cita.coordenadasoentrecalles2 ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles2) : "#";
-                  let coordsHtml2 = cita.coordenadasoentrecalles2 ?
-                  '<a href="' + urlMaps2 + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir 2da en Google Maps">📍 (Destino): ' + cita.coordenadasoentrecalles2 + '</a>' : '';
+                  let coordsHtml2 = cita.coordenadasoentrecalles2 ? '<a href="' + urlMaps2 + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir 2da en Google Maps">📍 (Destino): ' + cita.coordenadasoentrecalles2 + '</a>' : '';
                   let realLink = cita.linkCliente ? (cita.linkCliente.indexOf('http') === 0 ? cita.linkCliente : 'https://' + cita.linkCliente) : "#";
                   let linkHtml = cita.linkCliente ? '<a href="' + realLink + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold break-all truncate block mt-1">🔗 Enlace del cliente</a>' : '';
                   let extrasHtml = '';
@@ -1044,8 +1059,7 @@
         }
         
         let listaTecnicos = [];
-        try { let d = safeStorage.getItem('config_lista_tecnicos'); if (d) listaTecnicos = JSON.parse(d);
-        } catch(e){}
+        try { let d = safeStorage.getItem('config_lista_tecnicos'); if (d) listaTecnicos = JSON.parse(d); } catch(e){}
         if (listaTecnicos.indexOf(nombreNuevo) === -1) {
             listaTecnicos.push(nombreNuevo);
             safeStorage.setItem('config_lista_tecnicos', JSON.stringify(listaTecnicos)); poblarSelects();
@@ -1075,11 +1089,9 @@
         let select = document.getElementById(idSelect); if (!select) return valor;
         let existe = false; let valorExacto = valor;
         for (let i = 0; i < select.options.length; i++) {
-            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { existe = true;
-            valorExacto = select.options[i].value; break; }
+            if (select.options[i].value.toString().trim().toLowerCase() === valor.toString().trim().toLowerCase()) { existe = true; valorExacto = select.options[i].value; break; }
         }
-        if (!existe) { let opt = document.createElement('option');
-        opt.value = valor; opt.innerText = valor; select.appendChild(opt); }
+        if (!existe) { let opt = document.createElement('option'); opt.value = valor; opt.innerText = valor; select.appendChild(opt); }
         return valorExacto;
     }
 
@@ -1095,7 +1107,7 @@
       document.getElementById('form_tecnico').value = cuadrilla;
       document.getElementById('modalTitulo').innerText = "Nuevo Registro - " + cuadrilla;
       document.getElementById('btnEliminarRegistro').classList.add('hidden');
-      document.getElementById('btnDuplicarRegistro').classList.add('hidden'); // Ocultar al crear nuevo
+      document.getElementById('btnDuplicarRegistro').classList.add('hidden'); 
       
       desbloquearCamposFormulario();
       verificarMotivo();
@@ -1126,11 +1138,11 @@
       
       if(rolUsuario === 'admin') {
           document.getElementById('btnEliminarRegistro').classList.remove('hidden');
-          document.getElementById('btnDuplicarRegistro').classList.remove('hidden'); // Mostrar para admin
+          document.getElementById('btnDuplicarRegistro').classList.remove('hidden'); 
           desbloquearCamposFormulario();
       } else {
           document.getElementById('btnEliminarRegistro').classList.add('hidden');
-          document.getElementById('btnDuplicarRegistro').classList.add('hidden'); // Ocultar para técnico
+          document.getElementById('btnDuplicarRegistro').classList.add('hidden'); 
           bloquearCamposParaTecnico();
       }
       
@@ -1140,12 +1152,10 @@
 
     function enviarDatos(ev) {
       ev.preventDefault();
-      
       const ipIngresada = document.getElementById('form_ip').value.trim();
       if (ipIngresada !== "") {
         const ipRegEx = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        if (!ipRegEx.test(ipIngresada)) { alert("⚠️ El formato de la IP es incorrecto (Ej. 192.168.1.1). Por favor, corrígelo o deja el campo vacío.");
-        return; }
+        if (!ipRegEx.test(ipIngresada)) { alert("⚠️ El formato de la IP es incorrecto (Ej. 192.168.1.1). Por favor, corrígelo o deja el campo vacío."); return; }
       }
 
       if (!confirm("¿Estás seguro de que deseas guardar este registro?")) return;
@@ -1159,8 +1169,7 @@
       let espacioFinal = document.getElementById('form_espacio').value;
       if (tecnico !== normalizarTecnico(cuadrillaOriginal)) {
           let esp = 1;
-          while (baseDatosGoogle.some(function(c) { return c.fecha === fecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp && c.rowNum != rowNum; })) { esp++;
-          }
+          while (baseDatosGoogle.some(function(c) { return c.fecha === fecha && normalizarTecnico(c.tecnico) === tecnico && c.espacio == esp && c.rowNum != rowNum; })) { esp++; }
           espacioFinal = esp;
       }
 
@@ -1169,14 +1178,12 @@
         const horarioDuplicado = baseDatosGoogle.some(function(c) {
           return c.fecha === fecha && c.tecnico === tecnico && c.horario && c.horario.trim().toLowerCase() === horario.trim().toLowerCase() && c.rowNum != rowNum;
         });
-        if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + horario + "' ya está asignado a la cuadrilla '" + tecnico + "' en esta fecha. Por favor, asigne otro horario diferente.");
-        return; }
+        if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + horario + "' ya está asignado a la cuadrilla '" + tecnico + "' en esta fecha. Por favor, asigne otro horario diferente."); return; }
       }
       
       const btn = document.getElementById('btnGuardarRegistro');
       btn.innerHTML = "Guardando..."; btn.disabled = true;
       
-      // SISTEMA DE PRESERVACIÓN DE DATOS BLINDADO
       let citaOriginal = rowNum ? baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; }) : null;
       let datosPayload = citaOriginal ? Object.assign({}, citaOriginal) : {};
       datosPayload.rowNum = rowNum;
@@ -1223,62 +1230,43 @@
       }
     }
 
-    // ==========================================
-    // NUEVA FUNCIÓN PARA DUPLICAR REGISTRO
-    // ==========================================
     function duplicarRegistroBD() {
        const rowNum = document.getElementById('form_rownum').value;
        if(!rowNum) return;
-       
        let fechaActual = document.getElementById('form_fecha').value;
        let nuevaFecha = prompt("Para duplicar este registro, ingresa la fecha destino (Formato: AAAA-MM-DD):", fechaActual);
-       
        if (!nuevaFecha || nuevaFecha.trim() === "") return;
        
-       // Validar que se haya insertado una fecha con formato válido simple
        const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
-       if (!regexFecha.test(nuevaFecha.trim())) {
-           alert("⚠️ Formato de fecha inválido. Por favor usa AAAA-MM-DD.");
-           return;
-       }
+       if (!regexFecha.test(nuevaFecha.trim())) { alert("⚠️ Formato de fecha inválido. Por favor usa AAAA-MM-DD."); return; }
 
        if (!confirm("¿Estás seguro de que deseas duplicar este registro para el día " + nuevaFecha.trim() + "?")) return;
 
-       // Obtenemos la cita intacta original desde la memoria
        let citaOriginal = baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; });
        if(!citaOriginal) return;
 
        let datosPayload = Object.assign({}, citaOriginal);
-       
-       // Eliminamos rowNum para que Code.gs lo detecte como "registro nuevo" y lo inserte al final
        delete datosPayload.rowNum; 
        datosPayload.fecha = nuevaFecha.trim();
-       delete datosPayload.espacio; // Forzamos que se asigne automáticamente al final de los espacios del nuevo día
-       
+       delete datosPayload.espacio; 
        datosPayload.usuario_movimiento = (safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa')) + " (Duplicado)";
 
        const btn = document.getElementById('btnDuplicarRegistro');
        const textoOriginal = btn.innerHTML;
-       btn.innerHTML = "⏳ Duplicando...";
-       btn.disabled = true;
+       btn.innerHTML = "⏳ Duplicando..."; btn.disabled = true;
 
        if (typeof google !== 'undefined' && google.script && google.script.run) {
            google.script.run
              .withSuccessHandler(function(res) {
                 if(res.status === 'success') { 
                     alert("✅ Registro duplicado exitosamente al " + nuevaFecha.trim());
-                    cerrarModal(); 
-                    sincronizarDatos(); 
-                } else {
-                    alert("Error al duplicar: " + res.message);
-                }
-                btn.innerHTML = textoOriginal;
-                btn.disabled = false;
+                    cerrarModal(); sincronizarDatos(); 
+                } else { alert("Error al duplicar: " + res.message); }
+                btn.innerHTML = textoOriginal; btn.disabled = false;
              })
              .withFailureHandler(function(err) {
                 alert("Error de conexión al duplicar: " + err);
-                btn.innerHTML = textoOriginal;
-                btn.disabled = false;
+                btn.innerHTML = textoOriginal; btn.disabled = false;
              })
              .guardarRegistroAgenda(datosPayload);
        }
@@ -1288,12 +1276,10 @@
        if(!confirm("¿Estás seguro de eliminar este registro?")) return;
        const rowNum = document.getElementById('form_rownum').value;
        if(!rowNum) return;
-       
        const usuario = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
        google.script.run
          .withSuccessHandler(function(res) {
-            if(res.status === 'success') { cerrarModal(); sincronizarDatos(); } 
-            else alert("Error: " + res.message);
+            if(res.status === 'success') { cerrarModal(); sincronizarDatos(); } else alert("Error: " + res.message);
          }).eliminarRegistroAgenda(rowNum, usuario);
     }
 
@@ -1301,22 +1287,15 @@
 
     function abrirRutaMapa(cuadrilla, fecha) {
       let citas = baseDatosGoogle.filter(function(c) { 
-          return c.tecnico === cuadrilla && c.fecha === fecha && 
-                 ((c.coordenadasoentrecalles && c.coordenadasoentrecalles.trim() !== "") || 
-                  (c.coordenadasoentrecalles2 && c.coordenadasoentrecalles2.trim() !== "")); 
+          return c.tecnico === cuadrilla && c.fecha === fecha && ((c.coordenadasoentrecalles && c.coordenadasoentrecalles.trim() !== "") || (c.coordenadasoentrecalles2 && c.coordenadasoentrecalles2.trim() !== "")); 
       });
-      if (citas.length === 0) { alert("No hay coordenadas o ubicaciones registradas para mapear la ruta de esta cuadrilla en el día seleccionado.");
-      return; }
+      if (citas.length === 0) { alert("No hay coordenadas registradas para mapear."); return; }
       
       citas.sort(function(a, b) { return parseInt(a.espacio) - parseInt(b.espacio); });
       let puntos = [];
       citas.forEach(function(c) {
-          if (c.coordenadasoentrecalles && c.coordenadasoentrecalles.trim() !== "") {
-              puntos.push(encodeURIComponent(c.coordenadasoentrecalles.trim()));
-          }
-          if (c.coordenadasoentrecalles2 && c.coordenadasoentrecalles2.trim() !== "") {
-              puntos.push(encodeURIComponent(c.coordenadasoentrecalles2.trim()));
-          }
+          if (c.coordenadasoentrecalles && c.coordenadasoentrecalles.trim() !== "") puntos.push(encodeURIComponent(c.coordenadasoentrecalles.trim()));
+          if (c.coordenadasoentrecalles2 && c.coordenadasoentrecalles2.trim() !== "") puntos.push(encodeURIComponent(c.coordenadasoentrecalles2.trim()));
       });
       let urlMapsDir = "https://www.google.com/maps/dir/" + puntos.join("/");
       window.open(urlMapsDir, '_blank');
@@ -1333,72 +1312,41 @@
            let el = document.getElementById(id);
            if(!el) continue;
            let valorAnterior = el.value; el.innerHTML = '<option value="">Seleccione...</option>';
-           let lista = []; try { let stored = safeStorage.getItem(confKey);
-           if (stored) lista = JSON.parse(stored); } catch(e) {}
+           let lista = []; try { let stored = safeStorage.getItem(confKey); if (stored) lista = JSON.parse(stored); } catch(e) {}
            lista.forEach(function(item) { let opt = document.createElement('option'); opt.value = item; opt.innerText = item; el.appendChild(opt); });
-           // Aseguramos que el valor previo no se pierda al recargar la lista
            if(valorAnterior) { 
                let existe = false;
-               for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break;
-               } }
-               if(!existe) { let opt = document.createElement('option');
-               opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
+               for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break; } }
+               if(!existe) { let opt = document.createElement('option'); opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
                el.value = valorAnterior;
            }
        }
     }
 
-    // ==========================================
-    // SISTEMA DRAG & DROP REACTIVADO
-    // ==========================================
-    function dragStart(ev, rowNum) {
-        window.isDragging = true;
-        ev.dataTransfer.setData("text/plain", rowNum);
-    }
-    
-    function dragOver(ev) { 
-        ev.preventDefault();
-        ev.currentTarget.classList.add('drag-over');
-    }
-    
-    function dragLeave(ev) { 
-        ev.currentTarget.classList.remove('drag-over');
-    }
+    function dragStart(ev, rowNum) { window.isDragging = true; ev.dataTransfer.setData("text/plain", rowNum); }
+    function dragOver(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+    function dragLeave(ev) { ev.currentTarget.classList.remove('drag-over'); }
     
     function drop(ev, nuevaCuadrilla, nuevoEspacio) {
       window.isDragging = false;
-      ev.preventDefault(); 
-      ev.currentTarget.classList.remove('drag-over');
-      
-      const rowNum = ev.dataTransfer.getData("text/plain");
-      if (!rowNum) return;
-      const citaIndex = baseDatosGoogle.findIndex(function(c) { return c.rowNum == rowNum; });
-      if (citaIndex === -1) return;
+      ev.preventDefault(); ev.currentTarget.classList.remove('drag-over');
+      const rowNum = ev.dataTransfer.getData("text/plain"); if (!rowNum) return;
+      const citaIndex = baseDatosGoogle.findIndex(function(c) { return c.rowNum == rowNum; }); if (citaIndex === -1) return;
       
       let cita = baseDatosGoogle[citaIndex];
-      const espacioOcupado = baseDatosGoogle.some(function(c) {
-          return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.espacio == nuevoEspacio && c.rowNum != cita.rowNum;
-      });
-      if (espacioOcupado) { alert("⚠️ Acción denegada: Este espacio ya está ocupado por otro cliente. Por favor, arrastra a un recuadro disponible (+).");
-      return; }
+      const espacioOcupado = baseDatosGoogle.some(function(c) { return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.espacio == nuevoEspacio && c.rowNum != cita.rowNum; });
+      if (espacioOcupado) { alert("⚠️ Acción denegada: Este espacio ya está ocupado."); return; }
 
       if (cita.horario && cita.horario.trim().toLowerCase().indexOf("disponibilidad") === -1) {
-         const horarioDuplicado = baseDatosGoogle.some(function(c) {
-            return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.horario && c.horario.trim().toLowerCase() === cita.horario.trim().toLowerCase() && c.rowNum != cita.rowNum;
-         });
-         if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + cita.horario + "' ya está asignado a la cuadrilla '" + nuevaCuadrilla + "'. Movimiento cancelado.");
-         return; }
+         const horarioDuplicado = baseDatosGoogle.some(function(c) { return c.fecha === cita.fecha && c.tecnico === nuevaCuadrilla && c.horario && c.horario.trim().toLowerCase() === cita.horario.trim().toLowerCase() && c.rowNum != cita.rowNum; });
+         if (horarioDuplicado) { alert("⚠️ Advertencia: El horario '" + cita.horario + "' ya está asignado a la cuadrilla '" + nuevaCuadrilla + "'. Movimiento cancelado."); return; }
       }
       
-      cita.tecnico = nuevaCuadrilla;
-      cita.espacio = nuevoEspacio;
-      cita.usuario_movimiento = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
+      cita.tecnico = nuevaCuadrilla; cita.espacio = nuevoEspacio; cita.usuario_movimiento = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
       
       renderizarAgenda();
       if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run
-            .withFailureHandler(function(err) { alert("Error al mover la cita: " + err); sincronizarDatos(); })
-            .guardarRegistroAgenda(cita);
+          google.script.run.withFailureHandler(function(err) { alert("Error al mover: " + err); sincronizarDatos(); }).guardarRegistroAgenda(cita);
       }
     }
 
@@ -1408,25 +1356,17 @@
           let el = formElements[i];
           if (el.type === 'button' || el.type === 'submit' || el.type === 'hidden') continue;
           if (camposPermitidosTecnico.indexOf(el.id) === -1) {
-              el.readOnly = true;
-              if(el.tagName === 'SELECT') el.disabled = true; el.classList.add('campo-bloqueado');
-          } else {
-              el.readOnly = false;
-              el.disabled = false; el.classList.remove('campo-bloqueado');
-          }
+              el.readOnly = true; if(el.tagName === 'SELECT') el.disabled = true; el.classList.add('campo-bloqueado');
+          } else { el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado'); }
       }
     }
 
     function desbloquearCamposFormulario() {
       const formElements = document.getElementById('formularioAgenda').elements;
-      for(let i=0; i<formElements.length; i++) {
-          let el = formElements[i];
-          el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado');
-      }
+      for(let i=0; i<formElements.length; i++) { let el = formElements[i]; el.readOnly = false; el.disabled = false; el.classList.remove('campo-bloqueado'); }
     }
 
-    function cambioDeFechaFiltro() { renderizarAgenda();
-    }
+    function cambioDeFechaFiltro() { renderizarAgenda(); }
     
     function modificarEspacios(fecha, cuadrilla, operacion) {
       if (!espaciosPorFecha[fecha]) espaciosPorFecha[fecha] = {};
@@ -1443,27 +1383,23 @@
       if (!espaciosPorFecha[fechaActual]) espaciosPorFecha[fechaActual] = {};
       if (!espaciosPorFecha[fechaActual][nueva]) { espaciosPorFecha[fechaActual][nueva] = 4; }
       window.cuadrillasManuales = window.cuadrillasManuales || {};
-      if (!window.cuadrillasManuales[fechaActual]) window.cuadrillasManuales[fechaActual] = {};
-      window.cuadrillasManuales[fechaActual][nueva] = true;
-      if (window.cuadrillasOcultas && window.cuadrillasOcultas[fechaActual]) { delete window.cuadrillasOcultas[fechaActual][nueva];
-      }
-      safeStorage.setItem('espacios_por_fecha_v4', JSON.stringify(espaciosPorFecha)); renderizarAgenda();
-      input.value = '';
+      if (!window.cuadrillasManuales[fechaActual]) window.cuadrillasManuales[fechaActual] = {}; window.cuadrillasManuales[fechaActual][nueva] = true;
+      if (window.cuadrillasOcultas && window.cuadrillasOcultas[fechaActual]) { delete window.cuadrillasOcultas[fechaActual][nueva]; }
+      safeStorage.setItem('espacios_por_fecha_v4', JSON.stringify(espaciosPorFecha)); renderizarAgenda(); input.value = '';
     }
 
     function gestionarLista(configKey, titulo) {
-       let lista = [];
-       try { let d = safeStorage.getItem(configKey); if(d) lista = JSON.parse(d);
-       } catch(e){}
+       let lista = []; try { let d = safeStorage.getItem(configKey); if(d) lista = JSON.parse(d); } catch(e){}
        let nuevaLista = prompt("Editar " + titulo + " (separa las opciones por comas):", lista.join(", "));
        if(nuevaLista !== null) {
-          let arr = nuevaLista.split(',').map(function(s) { 
-              let val = s.trim(); if (configKey === 'config_lista_tecnicos') val = normalizarTecnico(val); return val;
-          }).filter(function(s) { return s; });
+          let arr = nuevaLista.split(',').map(function(s) { let val = s.trim(); if (configKey === 'config_lista_tecnicos') val = normalizarTecnico(val); return val; }).filter(function(s) { return s; });
           safeStorage.setItem(configKey, JSON.stringify(arr)); poblarSelects();
        }
     }
 
+    // ==========================================
+    // VISTA GENERAL ADMIN (DISEÑO MEJORADO)
+    // ==========================================
     let baseDatosCompletaAdmin = { headers: [], rows: [] };
     function abrirVistaGeneralAdmin() {
       if (rolUsuario !== 'admin') return;
@@ -1479,46 +1415,39 @@
         if (btn) btn.innerHTML = "🔄 Sincronizar";
         document.getElementById('cargandoTablaAdmin').classList.add('hidden');
         document.getElementById('tablaAdminCompleta').classList.remove('hidden');
-        if (response.status === 'success') { baseDatosCompletaAdmin = response; construirTablaFiltrosAdmin(); } 
-        else { alert('Fallo de conexión en lectura completa: ' + response.message); }
+        if (response.status === 'success') { baseDatosCompletaAdmin = response; construirTablaFiltrosAdmin(); } else { alert('Fallo: ' + response.message); }
       }).obtenerTodoContenidoBaseDatos();
     }
 
     function cerrarVistaGeneralAdmin() { document.getElementById('vistaAdminFiltros').classList.add('hidden'); }
 
     function construirTablaFiltrosAdmin() {
-      const thead = document.getElementById('tablaAdminHeader');
-      const tbody = document.getElementById('tablaAdminBody');
+      const thead = document.getElementById('tablaAdminHeader'); const tbody = document.getElementById('tablaAdminBody');
       thead.innerHTML = ''; tbody.innerHTML = '';
       if (!baseDatosCompletaAdmin.headers || baseDatosCompletaAdmin.headers.length === 0) return;
       const filaTitulos = document.createElement('tr'); const filaFiltros = document.createElement('tr');
-      filaFiltros.className = "bg-slate-50 border-b border-slate-300";
+      filaFiltros.className = "bg-slate-50 border-b border-indigo-100 shadow-sm";
       baseDatosCompletaAdmin.headers.forEach((header, index) => {
         const th = document.createElement('th');
-        th.className = "px-3 py-2.5 font-bold text-slate-700 whitespace-nowrap uppercase tracking-wider border-b border-slate-200 text-[11px]";
+        th.className = "px-3 py-3 font-bold text-indigo-800 whitespace-nowrap uppercase tracking-wider border-b border-indigo-100 text-[11px] text-center";
         th.textContent = header; filaTitulos.appendChild(th);
 
-        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-slate-300";
+        const thFiltro = document.createElement('th'); thFiltro.className = "px-2 py-1.5 border-b border-indigo-100";
         if (header.toLowerCase().includes('fecha')) {
           const divRange = document.createElement('div'); divRange.className = "flex flex-col gap-1 min-w-[110px]";
-          
           const inputInicio = document.createElement('input'); inputInicio.type = "date"; inputInicio.id = `filtro_admin_col_${index}_inicio`; inputInicio.title = "Fecha Inicial"; inputInicio.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputInicio.addEventListener('input', ejecutarFiltrosAdmin);
-          const inputFin = document.createElement('input');
-          inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final";
-          inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
+          const inputFin = document.createElement('input'); inputFin.type = "date"; inputFin.id = `filtro_admin_col_${index}_fin`; inputFin.title = "Fecha Final"; inputFin.className = "w-full border border-slate-300 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-indigo-500"; inputFin.addEventListener('input', ejecutarFiltrosAdmin);
           divRange.appendChild(inputInicio); divRange.appendChild(inputFin); thFiltro.appendChild(divRange);
         } else {
-          const inputTexto = document.createElement('input'); inputTexto.type = "text";
-          inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin);
-          thFiltro.appendChild(inputTexto);
+          const inputTexto = document.createElement('input'); inputTexto.type = "text"; inputTexto.id = `filtro_admin_col_${index}`; inputTexto.placeholder = `Buscar...`; inputTexto.className = "w-full border border-slate-300 rounded px-2 py-1 text-[11px] font-normal focus:outline-none focus:border-indigo-500 text-slate-700 text-center"; inputTexto.addEventListener('input', ejecutarFiltrosAdmin); thFiltro.appendChild(inputTexto);
         }
         filaFiltros.appendChild(thFiltro);
       });
       thead.appendChild(filaTitulos); thead.appendChild(filaFiltros);
       baseDatosCompletaAdmin.rows.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors"; tr.id = `fila_admin_raw_${rowIndex}`;
+        const tr = document.createElement('tr'); tr.className = "hover:bg-indigo-50 transition-colors"; tr.id = `fila_admin_raw_${rowIndex}`;
         row.forEach((cellValue) => {
-          const td = document.createElement('td'); td.className = "px-3 py-2 whitespace-nowrap text-slate-600 max-w-[200px] truncate text-[11px]"; td.textContent = cellValue || ""; td.title = cellValue || ""; tr.appendChild(td);
+          const td = document.createElement('td'); td.className = "px-3 py-2.5 whitespace-nowrap text-slate-600 max-w-[200px] truncate text-[11px] border-b border-slate-100"; td.textContent = cellValue || ""; td.title = cellValue || ""; tr.appendChild(td);
         });
         tbody.appendChild(tr);
       });
@@ -1526,18 +1455,14 @@
     }
 
     function ejecutarFiltrosAdmin() {
-      const rowsData = baseDatosCompletaAdmin.rows;
-      let contadorVisibles = 0; const filtrosActivos = [];
+      const rowsData = baseDatosCompletaAdmin.rows; let contadorVisibles = 0; const filtrosActivos = [];
       for (let index = 0; index < baseDatosCompletaAdmin.headers.length; index++) {
         const headerName = baseDatosCompletaAdmin.headers[index].toLowerCase();
         if (headerName.includes('fecha')) {
-          filtrosActivos[index] = { tipo: 'fecha', inicio: document.getElementById(`filtro_admin_col_${index}_inicio`)?.value ||
-          "", fin: document.getElementById(`filtro_admin_col_${index}_fin`)?.value || "" };
+          filtrosActivos[index] = { tipo: 'fecha', inicio: document.getElementById(`filtro_admin_col_${index}_inicio`)?.value || "", fin: document.getElementById(`filtro_admin_col_${index}_fin`)?.value || "" };
         } else {
-          const inputVal = document.getElementById(`filtro_admin_col_${index}`)?.value.toLowerCase().trim() ||
-          ""; let regex = null;
-          if (inputVal) { const queryEscapado = inputVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          regex = new RegExp("(^|[\\s\\W_])" + queryEscapado + "([\\s\\W_]|$)", "i"); }
+          const inputVal = document.getElementById(`filtro_admin_col_${index}`)?.value.toLowerCase().trim() || ""; let regex = null;
+          if (inputVal) { const queryEscapado = inputVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); regex = new RegExp("(^|[\\s\\W_])" + queryEscapado + "([\\s\\W_]|$)", "i"); }
           filtrosActivos[index] = { tipo: 'texto', query: inputVal, regex: regex };
         }
       }
@@ -1548,13 +1473,11 @@
           const filtro = filtrosActivos[index]; const cellValue = (row[index] || "").toString().toLowerCase().trim();
           if (filtro.tipo === 'fecha') {
             const cellDateStr = (row[index] || "").trim();
-       
             if (cellDateStr) { if (filtro.inicio && cellDateStr < filtro.inicio) { cumpleFiltros = false; break; } if (filtro.fin && cellDateStr > filtro.fin) { cumpleFiltros = false; break; } } 
             else if (filtro.inicio || filtro.fin) { cumpleFiltros = false; break; }
           } else {
             if (filtro.query) {
-              const esIgualDirecto = (cellValue === 
-              filtro.query);
+              const esIgualDirecto = (cellValue === filtro.query);
               if (!esIgualDirecto && filtro.regex && !filtro.regex.test(cellValue)) { cumpleFiltros = false; break; }
             }
           }
@@ -1564,25 +1487,212 @@
       });
       document.getElementById('totalFilasMostradas').textContent = `Registros filtrados: ${contadorVisibles} de ${rowsData.length}`;
     }
-  </script>
-<div id="modalClientesSimilares" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[120]">
-  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-    <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-      <h3 class="font-black text-lg text-slate-800">Seleccionar Cliente WispHub</h3>
-      <button type="button" onclick="document.getElementById('modalClientesSimilares').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
-    </div>
-    
-    <div class="p-4 border-b border-slate-200 bg-slate-50">
-      <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
-    
-      <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-    </div>
 
-    <div class="p-6 overflow-y-auto flex-1">
-      <div id="listaClientesSimilares" class="space-y-3">
-        </div>
-    </div>
-  </div>
-</div>
+    // ==========================================
+    // NUEVO: FUNCIONALIDAD DE DASHBOARD Y GRÁFICAS
+    // ==========================================
+    function abrirDashboard() {
+        document.getElementById('vistaDashboardFiltros').classList.remove('hidden');
+        if (!datosDashboardGral) { sincronizarDashboard(); } else { renderizarDashboardGrid(); }
+    }
+
+    function cerrarDashboard() { document.getElementById('vistaDashboardFiltros').classList.add('hidden'); }
+
+    function sincronizarDashboard() {
+        const btn = document.getElementById('btnSincronizarDashboard');
+        if (btn) btn.innerHTML = "⏳ Cargando Datos...";
+        google.script.run.withSuccessHandler(function(res) {
+            if (btn) btn.innerHTML = "🔄 Actualizar Datos";
+            if (res.status === 'success') { datosDashboardGral = res.data; renderizarDashboardGrid(); } 
+            else { alert("Error cargando dashboard: " + res.message); }
+        }).withFailureHandler(function(err){
+            if (btn) btn.innerHTML = "🔄 Actualizar Datos";
+            alert("Error de red: " + err);
+        }).obtenerDatosDashboard();
+    }
+
+    function formateaCelda(val) {
+        if (val === null || val === undefined || val === '') return '';
+        let numStr = val.toString();
+        // Si tiene decimales y es un número, se multiplica x100 y añade %
+        if (numStr.indexOf('.') !== -1 && !isNaN(numStr)) {
+            let parsed = parseFloat(numStr);
+            return (parsed * 100).toFixed(1).replace('.0', '') + '%';
+        }
+        return val;
+    }
+
+    function renderizarDashboardGrid() {
+        const grid = document.getElementById('dashboardGrid');
+        grid.innerHTML = '';
+        Object.keys(configTablas).forEach(tablaId => {
+            const conf = configTablas[tablaId];
+            const div = document.createElement('div');
+            div.className = "bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group";
+            div.onclick = () => abrirDetalleDashboard(tablaId);
+            
+            // Icono contextual basado en el tipo de gráfico
+            let iconStr = conf.tipo === 'pie' ? '🍩' : (conf.tipo === 'line' ? '📈' : '📊');
+
+            div.innerHTML = `
+               <div>
+                 <div class="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4 text-2xl shadow-sm">
+                   ${iconStr}
+                 </div>
+                 <h3 class="font-bold text-slate-800 text-lg leading-tight mb-2">${conf.titulo}</h3>
+                 <p class="text-xs text-slate-500 mb-4">Haz clic para expandir la tabla detallada y visualizar la gráfica interactiva.</p>
+               </div>
+               <div class="text-indigo-600 font-bold text-sm flex items-center gap-1 group-hover:text-indigo-800 transition-colors">
+                 Ver Análisis <span class="text-lg transform group-hover:translate-x-1 transition-transform">→</span>
+               </div>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
+    function abrirDetalleDashboard(tablaId) {
+        const conf = configTablas[tablaId];
+        const rawData = datosDashboardGral[tablaId];
+        document.getElementById('dashModalTitulo').innerText = conf.titulo;
+        
+        const thead = document.getElementById('dashModalTablaHead');
+        const tbody = document.getElementById('dashModalTablaBody');
+        thead.innerHTML = ''; tbody.innerHTML = '';
+        
+        let labelsForChart = [];
+        let datasetsForChart = [];
+
+        if (conf.esColumnar) {
+            // Caso especial para Tabla 8 (Estructura en columnas)
+            let headers = Object.keys(rawData);
+            let headTr = document.createElement('tr');
+            headers.forEach(h => {
+                let th = document.createElement('th');
+                th.className = "px-4 py-3 font-bold uppercase tracking-wider text-xs"; 
+                th.innerText = h; headTr.appendChild(th);
+            });
+            thead.appendChild(headTr);
+
+            let numRows = rawData[headers[0]].length;
+            for(let i=0; i<numRows; i++) {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                headers.forEach(h => {
+                    let td = document.createElement('td');
+                    td.className = "px-4 py-2 text-slate-600 whitespace-nowrap";
+                    td.innerText = formateaCelda(rawData[h][i]);
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            }
+
+            labelsForChart = rawData[conf.colLabel].map(l => l.toString());
+            conf.colsData.forEach((colName, idx) => {
+                let color = idx === 0 ? '#4f46e5' : (idx === 1 ? '#10b981' : '#f59e0b');
+                datasetsForChart.push({
+                    label: colName,
+                    data: rawData[colName].map(v => parseFloat(v) || 0),
+                    backgroundColor: color,
+                    borderColor: color,
+                    borderWidth: 1
+                });
+            });
+
+        } else {
+            // Estructura estándar: Key = Etiqueta, Valor = Array de celdas
+            let keys = Object.keys(rawData);
+            let numVals = keys.length > 0 ? rawData[keys[0]].length : 0;
+            
+            let headTr = document.createElement('tr');
+            let thCat = document.createElement('th'); 
+            thCat.className = "px-4 py-3 font-bold uppercase tracking-wider text-xs"; 
+            thCat.innerText = "Categoría"; headTr.appendChild(thCat);
+            
+            for(let i=0; i<numVals; i++) {
+                let th = document.createElement('th'); 
+                th.className = "px-4 py-3 font-bold uppercase tracking-wider text-xs"; 
+                th.innerText = numVals > 1 ? "Valor " + (i+1) : "Total"; 
+                headTr.appendChild(th);
+            }
+            thead.appendChild(headTr);
+
+            keys.forEach(k => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                let tdCat = document.createElement('td'); 
+                tdCat.className = "px-4 py-2 font-semibold text-slate-700 whitespace-nowrap"; 
+                tdCat.innerText = k; tr.appendChild(tdCat);
+                
+                rawData[k].forEach(v => {
+                    let td = document.createElement('td'); 
+                    td.className = "px-4 py-2 text-slate-600"; 
+                    td.innerText = formateaCelda(v); 
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            labelsForChart = keys;
+            datasetsForChart.push({
+                label: "Valor Principal",
+                data: keys.map(k => parseFloat(rawData[k][0]) || 0),
+                backgroundColor: '#4f46e5',
+                borderColor: '#3730a3',
+                borderWidth: 1
+            });
+            
+            // Renderizamos un segundo dataset si la tabla contiene dos columnas de valores (ej. Agendada / Realizada)
+            if (numVals > 1 && conf.tipo !== 'pie') {
+                datasetsForChart.push({
+                    label: "Valor Secundario",
+                    data: keys.map(k => parseFloat(rawData[k][1]) || 0),
+                    backgroundColor: '#10b981',
+                    borderColor: '#047857',
+                    borderWidth: 1
+                });
+            }
+        }
+
+        renderCanvasChart(conf.tipo, labelsForChart, datasetsForChart);
+        document.getElementById('modalDetalleDashboard').classList.remove('hidden');
+    }
+
+    function renderCanvasChart(type, labels, datasets) {
+        if (chartInstance) { chartInstance.destroy(); }
+        const ctx = document.getElementById('dashModalCanvas').getContext('2d');
+        
+        // Ajuste de colores vibrantes para gráfica de Pastel
+        if (type === 'pie') {
+            const pieColors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#64748b'];
+            datasets[0].backgroundColor = pieColors.slice(0, labels.length);
+            datasets[0].borderColor = '#ffffff';
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: type,
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: type === 'pie' ? 'right' : 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) { label += context.parsed.y; }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function cerrarModalDashboard() { document.getElementById('modalDetalleDashboard').classList.add('hidden'); }
+
+  </script>
 </body>
 </html>
