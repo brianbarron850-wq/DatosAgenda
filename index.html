@@ -423,7 +423,7 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbzMLNnHvFaxGokLmWzahKqb762C0uZ1PkFIaSP-LjgayoCn9naXngUChF3lTtYvOjZO/exec";
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycby14_v_WsQRBBz8g5dyWQtzdFRVuUuMmypb92wQ24JVMuROPx4cQI2dYtcicZHITKIn/exec";
     if (typeof google === 'undefined') {
       window.google = {
         script: {
@@ -1767,7 +1767,15 @@
 
     function renderCanvasChart(type, labels, datasets) {
         if (chartInstance) { chartInstance.destroy(); }
-        const ctx = document.getElementById('dashModalCanvas').getContext('2d');
+        
+        // OPTIMIZACIÓN: Verificación para asegurar que el Canvas existe en el DOM antes de renderizar
+        const canvasElement = document.getElementById('dashModalCanvas');
+        if (!canvasElement) {
+            console.warn("El canvas no está listo en el DOM para renderizar.");
+            return; 
+        }
+        
+        const ctx = canvasElement.getContext('2d');
         
         if (type === 'pie') {
             const pieColors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#64748b'];
