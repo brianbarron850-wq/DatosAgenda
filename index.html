@@ -424,8 +424,10 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    // NOTA IMPORTANTE: Asegúrate de reemplazar esto con tu URL de la versión IMPLEMENTADA más reciente.
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbx423Ir-ZLAx1B_oLOMMIcPZ7z8moVgfsXyQMpmFQc2SdyxVMM2nqgwMGy6myvRim0Q/exec";
+    // IMPORTANTE: Asegúrate de que esta URL sea correcta y esté implementada como:
+    // 1. Ejecutar como: "Yo"
+    // 2. Quién tiene acceso: "Cualquier persona" (Anyone)
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbyES3Hjv4kqxUsr7bVkYvBhwpNaBeeUdwevLBtLT8rqBL129Tr24I_V0Pk1WRxn1-AO/exec";
     
     if (typeof google === 'undefined') {
       window.google = {
@@ -438,18 +440,30 @@
               const failureCb = this._onFailure;
               this._onSuccess = null;
               this._onFailure = null;
+              
               fetch(URL_API_GAS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ func: funcName, args: args }),
-                redirect: "follow" // OPTIMIZACIÓN CRÍTICA: Permite que el navegador siga la redirección CORS de App Script
+                body: JSON.stringify({ func: funcName, args: args })
               })
-              .then(res => res.json())
-              .then(data => {
+              .then(res => {
+                  if (!res.ok) throw new Error("Fallo en la red: " + res.status);
+                  return res.text();
+              })
+              .then(text => {
+                // Validación para evitar que trate de leer HTML (Error de Cuotas o Permisos) como si fuera JSON
+                if (text.trim().startsWith('<')) {
+                    throw new Error("⚠️ Alerta de Google:\nLa conexión devolvió una página en lugar de datos.\n\nEsto suele pasar porque excediste el límite de peticiones (cuotas) de Google de hoy, o los permisos de la URL en Apps Script no están en 'Cualquier Persona'.");
+                }
+                
+                const data = JSON.parse(text);
                 if (data && data.error) { if (failureCb) failureCb(data.error); } 
                 else { if (successCb) successCb(data.result); }
               })
-              .catch(err => { if (failureCb) failureCb(err); });
+              .catch(err => { 
+                console.error("Error en conexión:", err);
+                if (failureCb) failureCb(err.message || err); 
+              });
             },
             validarAutenticacion: function(pin) { this._call('validarAutenticacion', [pin]); },
             obtenerDatosAgenda: function() { this._call('obtenerDatosAgenda', []); },
@@ -641,9 +655,22 @@
       btn.disabled = false;
     }
 
+    // ==========================================
+    // OPTIMIZACIÓN DE RENDIMIENTO - CORRECCIÓN DE ERROR HTML
+    // ==========================================
     function iniciarSincronizacionAutomatica() {
       if(autoSyncInterval) clearInterval(autoSyncInterval);
-      autoSyncInterval = setInterval(sincronizarDatosSilencioso, 10000);
+      
+      // Se redujo la frecuencia a 1 minuto (60000ms).
+      // Anteriormente estaba en 10 segundos, lo cual sobrepasaba 
+      // fácilmente el límite de "cuotas de peticiones" diarias de Apps Script
+      // lo que causaba que devolviera un error en HTML y rompiera la app.
+      autoSyncInterval = setInterval(function() {
+        // Solo enviará petición si el usuario tiene la ventana abierta y activa
+        if (document.visibilityState === 'visible') {
+            sincronizarDatosSilencioso();
+        }
+      }, 60000);
     }
 
     function sincronizarDatosSilencioso() {
@@ -909,20 +936,45 @@
       });
       cuadrillasHoy.forEach(function(tec) {
           let citasTec = baseDatosGoogle.filter(function(c) { return c.fecha === fechaActual && c.tecnico === tec; });
+          
+          const horariosLower = horariosPorDefecto.map(function(h) { return h.toLowerCase(); });
+          
           citasTec.sort(function(a, b) {
               let horA = (a.horario || "").trim().toLowerCase();
               let horB = (b.horario || "").trim().toLowerCase();
+              
+              if (horA === "antes de las 12:00pm") horA = "antes de las 12pm";
+              if (horA === "despues de las 12:00pm") horA = "despues de las 12pm";
+              if (horA === "antes de las 3:00pm") horA = "antes de las 3pm";
+              if (horA === "despues de las 3:00pm") horA = "despues de las 3pm";
+              if (horA === "despues de las 6:00pm") horA = "despues de las 6pm";
+
+              if (horB === "antes de las 12:00pm") horB = "antes de las 12pm";
+              if (horB === "despues de las 12:00pm") horB = "despues de las 12pm";
+              if (horB === "antes de las 3:00pm") horB = "antes de las 3pm";
+              if (horB === "despues de las 3:00pm") horB = "despues de las 3pm";
+              if (horB === "despues de las 6:00pm") horB = "despues de las 6pm";
+              
               let isDispA = horA.indexOf("disponibilidad") !== -1;
               let isDispB = horB.indexOf("disponibilidad") !== -1;
 
               if (isDispA && !isDispB) return 1;
               if (!isDispA && isDispB) return -1;
+              
+              let idxA = horariosLower.indexOf(horA);
+              let idxB = horariosLower.indexOf(horB);
+              
+              if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+              if (idxA !== -1) return -1;
+              if (idxB !== -1) return 1;
+
               if (horA < horB) return -1;
               if (horA > horB) return 1;
               return 0;
           });
           citasTec.forEach(function(cita, idx) { cita.espacio = idx + 1; });
       });
+      
       let cuadrillasDelDia = {};
       baseDatosGoogle.forEach(function(cita) {
           if (cita.fecha === fechaActual && cita.tecnico && !ocultasHoy[cita.tecnico]) {
