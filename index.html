@@ -7,16 +7,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .slot-card { transition: all 0.2s ease;
-    }
-    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2;
-    }
-    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105;
-    }
-    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80;
-    }
+    .slot-card { transition: all 0.2s ease; }
+    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2; }
+    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105; }
+    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80; }
   </style>
   <script>
     // ==========================================
@@ -429,7 +424,9 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbxG4z7jCEZqBQWy-U0Jn3TooLg-tmWPVJsoGeUD4sWlSuB6kmEp2RpnpLS72ya_Y5vH/exec";
+    // NOTA IMPORTANTE: Asegúrate de reemplazar esto con tu URL de la versión IMPLEMENTADA más reciente.
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbx423Ir-ZLAx1B_oLOMMIcPZ7z8moVgfsXyQMpmFQc2SdyxVMM2nqgwMGy6myvRim0Q/exec";
+    
     if (typeof google === 'undefined') {
       window.google = {
         script: {
@@ -444,7 +441,8 @@
               fetch(URL_API_GAS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ func: funcName, args: args })
+                body: JSON.stringify({ func: funcName, args: args }),
+                redirect: "follow" // OPTIMIZACIÓN CRÍTICA: Permite que el navegador siga la redirección CORS de App Script
               })
               .then(res => res.json())
               .then(data => {
@@ -479,6 +477,7 @@
         setItem: function(key, val) { try { sessionStorage.setItem(key, val); } catch(e) { this.mem[key] = val.toString(); } },
         removeItem: function(key) { try { sessionStorage.removeItem(key); } catch(e) { delete this.mem[key]; } }
     };
+    
     const tecnicosPorDefecto = ["Cuadrilla 1", "Cuadrilla 2", "Cuadrilla 3", "Cuadrilla 4" ];
     const motivosPorDefecto = ["Instalación", "Soporte", "Cambio de Domicilio", "Desinstalación", "Sop/Des", "Des/Sop", "Migracion", "Reactivacion", "CAT" ];
     const horariosPorDefecto = ["9:00am", "9:30am", "10:00am", "10:30", "11:00am", "11:30am", "Antes de las 12pm", "12:00pm", "12:30pm","Despues de las 12pm", "1:00pm", "1:30pm", "2:00pm", "2:30pm","Antes de las 3pm", "3:00pm", "3:30pm", "Despues de las 3pm", "4:00pm", "4:30pm", "5:00pm", "5:30pm", "Despues de las 6pm", "Disponibilidad"];
@@ -490,6 +489,7 @@
     const yafueclientePorDefecto = ["No", "Si"];
     const bienvenidaPorDefecto = ["Si", "No", "Pendiente"];
     const mediosPorDefecto = ["Amigo/Familiar", "Facebook", "Radio", "Es cliente", "No contesto", "Rotulo", "Recomendación", "Folleto", "Página Web", "Otros"];
+    
     const camposPermitidosTecnico = [
       'form_ip',
       'form_coordenadasoentrecalles',
@@ -497,6 +497,7 @@
       'form_monto',
       'form_comentariosdeltecnico'
     ];
+    
     let baseDatosGoogle = [];
     let espaciosPorFecha = {};
     let rolUsuario = null;
@@ -516,6 +517,7 @@
         tabla9: { titulo: "Motivo desinstalación", tipo: "bar", labelsCol: true },
         tabla10: { titulo: "Desinstalaciones año contratado", tipo: "line", labelsCol: true }
     };
+    
     let datosDashboardGral = null;
     let chartInstance = null;
 
@@ -544,6 +546,7 @@
           if(!safeStorage.getItem('config_lista_medios')) safeStorage.setItem('config_lista_medios', JSON.stringify(mediosPorDefecto));
           let cached = safeStorage.getItem('espacios_por_fecha_v4');
           if(cached) espaciosPorFecha = JSON.parse(cached);
+          
           poblarSelects();
 
           const sesionGuardada = safeSession.getItem('sesion_activa');
@@ -1518,7 +1521,6 @@
         tr.className = "hover:bg-indigo-50 transition-colors cursor-pointer"; 
         tr.id = `fila_admin_raw_${rowIndex}`;
         
-        // EVENTO DOBLE CLIC PARA EDITAR REGISTRO SIN CERRAR LA VISTA GENERAL
         tr.ondblclick = function() {
             abrirModalEdicion(rowIndex + 2);
         };
@@ -1593,7 +1595,7 @@
                     if(res.status === 'success') {
               
                         alert("Fechas guardadas correctamente.");
-                        sincronizarDashboard(); // Recargar datos para refrescar las tablas
+                        sincronizarDashboard(); 
                     } else {
                         alert("Error al guardar fechas: " + res.message);
      
@@ -1619,7 +1621,6 @@
             if (btn) btn.innerHTML = "🔄 Actualizar Datos";
             if (res.status === 'success') { 
                 datosDashboardGral = res.data; 
-                // Asignar las fechas recuperadas a los inputs
                
                  if (res.data.fechas) {
                     document.getElementById('dashFechaD1').value = res.data.fechas.d1 || '';
