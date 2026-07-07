@@ -7,16 +7,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .slot-card { transition: all 0.2s ease;
-    }
-    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2;
-    }
-    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105;
-    }
-    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80;
-    }
+    .slot-card { transition: all 0.2s ease; }
+    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .section-divider { @apply col-span-1 md:col-span-2 border-b border-slate-200 text-xs font-bold text-indigo-600 uppercase tracking-wider pt-2 pb-1 mt-2; }
+    .drag-over { @apply bg-indigo-50 border-indigo-400 text-indigo-700 scale-105; }
+    .campo-bloqueado { @apply bg-slate-100 text-slate-500 cursor-not-allowed opacity-80; }
   </style>
   <script>
     // ==========================================
@@ -40,7 +35,7 @@
       <p class="text-sm text-slate-500 mb-6">Ingresa tu contraseña de seguridad para continuar.</p>
       <input type="password" id="inputPin" onkeyup="if(event.key === 'Enter') verificarPin()" placeholder="••••" class="w-full border border-slate-300 rounded-lg p-3 text-center text-3xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6 font-mono">
       <button id="btnLogin" onclick="verificarPin()" type="button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-      Ingresar
+        Ingresar
       </button>
       <p id="msgErrorPin" class="text-rose-600 text-xs font-bold mt-4 hidden"></p>
     </div>
@@ -101,7 +96,7 @@
           <h3 id="modalTitulo" class="font-black text-lg text-slate-800">Registrar en Agenda</h3>
         </div>
         <button type="button" onclick="cerrarModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1 leading-none">×</button>
-       </div>
+      </div>
       
       <form id="formularioAgenda" onsubmit="enviarDatos(event)" class="p-6 space-y-4">
         <input type="hidden" id="form_fecha">
@@ -113,7 +108,7 @@
           <div class="section-divider">Datos Operativos</div>
 
           <div>
-             <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
+            <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
               <span>Técnico Asignado / Cuadrilla</span>
               <button type="button" onclick="gestionarLista('config_lista_tecnicos', 'Técnico Asignado')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
             </label>
@@ -132,7 +127,7 @@
              <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
               <span>Horario</span>
               <button type="button" onclick="gestionarLista('config_lista_horarios', 'Horarios')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
-             </label>
+            </label>
             <select id="form_horario" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required></select>
           </div>
 
@@ -156,12 +151,12 @@
                   🔍
                 </button>
                 <div id="contenedor_estado_wisphub" class="hidden flex items-center justify-center shrink-0">
-                   <span id="badge_estado_wisphub" class="text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm"></span>
+                  <span id="badge_estado_wisphub" class="text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm"></span>
                 </div>
               </div>
               <input type="url" id="form_link_cliente" placeholder="Enlace personalizado (URL)" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
-           </div>
+          </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Teléfono</label>
@@ -237,21 +232,21 @@
             <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
                <span>Plan Contratado</span>
                <button type="button" onclick="gestionarLista('config_lista_planes', 'Planes')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
-             </label>
+            </label>
             <select id="form_plan" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
           </div>
           
           <div>
             <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
               <span>Confirmada</span>
-             <button type="button" onclick="gestionarLista('config_lista_confirmada', 'Opciones de Confirmada')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
+              <button type="button" onclick="gestionarLista('config_lista_confirmada', 'Opciones de Confirmada')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
             </label>
             <select id="form_confirmada" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
           </div>
 
           <div>
               <label class="flex justify-between items-center block text-xs font-bold text-slate-600 mb-1">
-               <span>Se realizó</span>
+                <span>Se realizó</span>
               <button type="button" onclick="gestionarLista('config_lista_serealizo', 'Opciones de Se realizó')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
              </label>
             <select id="form_serealizo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
@@ -263,7 +258,7 @@
               <button type="button" onclick="gestionarLista('config_lista_yafuecliente', 'Opciones de Cliente Histórico')" class="admin-only text-indigo-500 hover:text-indigo-800 text-[10px] px-1 bg-indigo-50 rounded hidden">⚙️ Editar</button>
              </label>
             <select id="form_yafuecliente" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
-           </div>
+          </div>
           
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Monto ($)</label>
@@ -271,14 +266,14 @@
           </div>
 
           <div class="md:col-span-2">
-             <label class="block text-xs font-bold text-slate-600 mb-1">Comentarios Generales</label>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Comentarios Generales</label>
             <textarea id="form_comentarios" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-600 mb-1">Comentarios CAT</label>
             <textarea id="form_comentarioscat" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-           </div>
+          </div>
           
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-600 mb-1">Comentarios del Técnico</label>
@@ -292,13 +287,13 @@
           <div class="md:col-span-2 mt-4 flex gap-3 justify-end border-t border-slate-200 pt-4 flex-wrap">
             <button type="button" id="btnDuplicarRegistro" onclick="duplicarRegistroBD()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
                📋 Duplicar a otro día
-             </button>
+            </button>
             <button type="button" id="btnEliminarRegistro" onclick="eliminarRegistroBD()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
                🗑️ Eliminar Registro
             </button>
             <button type="button" onclick="cerrarModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">
               Cancelar
-             </button>
+            </button>
             <button type="submit" id="btnGuardarRegistro" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
               Guardar Cambios
             </button>
@@ -416,7 +411,7 @@
       
       <div class="p-4 border-b border-slate-200 bg-slate-50">
         <label class="block text-xs font-bold text-slate-600 mb-1">Filtrar por IP:</label>
-         <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <input type="text" id="filtroIpSimilares" placeholder="Escribe la IP para filtrar..." onkeyup="filtrarSimilaresIp()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
       <div class="p-6 overflow-y-auto flex-1">
         <div id="listaClientesSimilares" class="space-y-3"></div>
@@ -428,15 +423,13 @@
     // ==========================================
     // ADAPTACIÓN API PARA GITHUB PAGES / HOST EXTERNO
     // ==========================================
-    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbw8nweDFM9tGkmXxPVg3F1JFAvuJgVaFrBeyrvju97Q33hoaW5VVkDIAOrHeBGu-Yy-/exec";
+    const URL_API_GAS = "https://script.google.com/macros/s/AKfycbyelh6x_R3DhiXug9D5WsU6tErV7DSZg8TYfI6D32WpMoMdd6B6-zb50JUleArOX2Buiw/exec";
     if (typeof google === 'undefined') {
       window.google = {
         script: {
           run: {
-            withSuccessHandler: function(onSuccess) { this._onSuccess = onSuccess;
-            return this; },
-            withFailureHandler: function(onFailure) { this._onFailure = onFailure;
-            return this; },
+            withSuccessHandler: function(onSuccess) { this._onSuccess = onSuccess; return this; },
+            withFailureHandler: function(onFailure) { this._onFailure = onFailure; return this; },
             _call: function(funcName, args) {
               const successCb = this._onSuccess;
               const failureCb = this._onFailure;
@@ -503,6 +496,7 @@
     let rolUsuario = null;
     let autoSyncInterval = null;
     window.isDragging = false;
+
     // CONFIGURACIÓN DE LAS TABLAS DEL DASHBOARD
     const configTablas = {
         tabla1: { titulo: "Instalaciones", tipo: "bar", labelsCol: true },
@@ -557,6 +551,7 @@
     };
 
     document.addEventListener('dragend', function() { window.isDragging = false; });
+    
     function verificarPin() {
       try {
           const pinInput = document.getElementById('inputPin');
@@ -576,20 +571,17 @@
               .withSuccessHandler(function(res) {
                 if (res && res.status === 'success') {
                   safeSession.setItem('sesion_activa', res.role);
-                
                   if (res.nombre) safeSession.setItem('nombre_usuario', res.nombre);
                   iniciarAppConRol(res.role);
                 } else {
                   msgError.innerText = (res && res.message) ? res.message : "Credenciales no válidas.";
                   msgError.classList.remove('hidden');
-             
                   btn.innerHTML = "Ingresar";
                   btn.disabled = false;
                 }
               })
               .withFailureHandler(function(err) {
                 msgError.innerText = "Error del sistema: " + (err.message || err);
-   
                 msgError.classList.remove('hidden');
                 btn.innerHTML = "Ingresar";
                 btn.disabled = false;
@@ -614,6 +606,7 @@
       document.getElementById('modalLogin').classList.add('hidden');
       document.getElementById('appContenedor').classList.remove('hidden');
       document.getElementById('badgeRol').innerText = rol === 'admin' ? 'Administrador' : 'Técnico';
+      
       if (rol === 'tecnico') {
         document.getElementById('panelAdmin').classList.add('hidden');
         document.querySelectorAll('.admin-only').forEach(function(el) { el.classList.add('hidden') });
@@ -642,7 +635,12 @@
 
     function iniciarSincronizacionAutomatica() {
       if(autoSyncInterval) clearInterval(autoSyncInterval);
-      autoSyncInterval = setInterval(sincronizarDatosSilencioso, 10000);
+      autoSyncInterval = setInterval(function() {
+        // OPTIMIZACIÓN: Solo sincronizar si la pestaña del navegador está visible para el usuario
+        if (!document.hidden) {
+            sincronizarDatosSilencioso();
+        }
+      }, 10000);
     }
 
     function sincronizarDatosSilencioso() {
@@ -694,6 +692,7 @@
       const originalText = btn.innerHTML;
       btn.innerHTML = "⏳";
       btn.disabled = true;
+      
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(res) {
@@ -707,7 +706,7 @@
             btn.innerHTML = originalText;
             btn.disabled = false;
             alert("Error al intentar conectar con WispHub: " + err);
-           })
+          })
           .buscarClienteWispHub(nombreInput, idInput);
       } else { btn.innerHTML = originalText; btn.disabled = false; alert("Entorno local detectado. Requiere despliegue de Apps Script."); }
     }
@@ -738,6 +737,7 @@
           let estado = (data.estado || "Desconocido").toUpperCase();
           badge.innerText = estado;
           badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
+          
           if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
           else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
           else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
@@ -796,6 +796,7 @@
         document.getElementById('form_telefono').value = data.telefono || "";
         document.getElementById('form_calleynumero').value = data.calleynumero || "";
         document.getElementById('form_coordenadasoentrecalles').value = data.coordenadas || "";
+        
         if (data.colonia) {
             let valorExactoColonia = asegurarOpcionSelect('form_coloniaofracc', data.colonia);
             document.getElementById('form_coloniaofracc').value = valorExactoColonia;
@@ -816,6 +817,7 @@
             let estado = (data.estado || "Desconocido").toUpperCase();
             badge.innerText = estado;
             badge.className = "text-[11px] uppercase tracking-wider font-black px-2 py-1 rounded-lg border shadow-sm";
+            
             if(estado === 'ACTIVO' || estado === 'INSTALADO') { badge.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300'); } 
             else if(estado === 'SUSPENDIDO' || estado === 'CORTADO' || estado === 'MOROSO') { badge.classList.add('bg-rose-100', 'text-rose-800', 'border-rose-300'); } 
             else if(estado === 'INACTIVO' || estado === 'DESINSTALADO' || estado === 'CANCELADO') { badge.classList.add('bg-slate-100', 'text-slate-800', 'border-slate-300'); } 
@@ -930,7 +932,6 @@
               if (horA > horB) return 1;
               return 0;
           });
-
           citasTec.forEach(function(cita, idx) { cita.espacio = idx + 1; });
       });
       let cuadrillasDelDia = {};
@@ -1040,10 +1041,13 @@
 
                   let urlMaps = cita.coordenadasoentrecalles ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles) : "#";
                   let coordsHtml = cita.coordenadasoentrecalles ? '<a href="' + urlMaps + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir en Google Maps">📍 ' + cita.coordenadasoentrecalles + '</a>' : '';
+                  
                   let urlMaps2 = cita.coordenadasoentrecalles2 ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cita.coordenadasoentrecalles2) : "#";
                   let coordsHtml2 = cita.coordenadasoentrecalles2 ? '<a href="' + urlMaps2 + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold truncate block mt-1" title="Abrir 2da en Google Maps">📍 (Destino): ' + cita.coordenadasoentrecalles2 + '</a>' : '';
+                  
                   let realLink = cita.linkCliente ? (cita.linkCliente.indexOf('http') === 0 ? cita.linkCliente : 'https://' + cita.linkCliente) : "#";
                   let linkHtml = cita.linkCliente ? '<a href="' + realLink + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold break-all truncate block mt-1">🔗 Enlace del cliente</a>' : '';
+                  
                   let extrasHtml = '';
                   if (cita.bienvenida) extrasHtml += '<div class="text-[10.5px] text-slate-600 mt-1">👋 Bienvenida: <span class="font-bold">' + cita.bienvenida + '</span></div>';
                   if (cita.pormediosediocuentadenosotros) {
@@ -1075,10 +1079,10 @@
               } else {
                   htmlCol += '<div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer text-slate-400 hover:text-indigo-600 min-h-[80px] flex flex-col items-center justify-center" ' +
                            'onclick="abrirModalNuevo(\'' + cuadrilla + '\', ' + i + ')" ' +
-                    'ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event, \'' + cuadrilla + '\', ' + i + ')">' +
+                           'ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event, \'' + cuadrilla + '\', ' + i + ')">' +
                           '<span class="text-xl leading-none block mb-1">+</span>' +
                           '<span class="text-[10px] font-bold uppercase tracking-wider">Añadir al Espacio ' + i + '</span>' +
-                          '</div>';
+                         '</div>';
               }
           }
           htmlCol += '</div>';
@@ -1094,6 +1098,7 @@
         
         nombreNuevo = normalizarTecnico(nombreNuevo);
         if (nombreNuevo === "" || nombreNuevo === normalizarTecnico(nombreViejo)) return;
+        
         if (espaciosPorFecha[fecha] && espaciosPorFecha[fecha][nombreViejo]) {
             espaciosPorFecha[fecha][nombreNuevo] = espaciosPorFecha[fecha][nombreViejo];
             delete espaciosPorFecha[fecha][nombreViejo];
@@ -1123,6 +1128,7 @@
     function eliminarCuadrilla(fecha, cuadrilla) {
         if (!confirm('¿Estás seguro de ocultar la columna de "' + cuadrilla + '" de la vista de hoy?\n\nNota: Los registros internos no se borrarán de Google Sheets, solo desaparecerá la columna de la agenda visual de forma temporal.')) return;
         window.cuadrillasOcultas = window.cuadrillasOcultas || {}; if (!window.cuadrillasOcultas[fecha]) window.cuadrillasOcultas[fecha] = {}; window.cuadrillasOcultas[fecha][cuadrilla] = true;
+        
         if (espaciosPorFecha[fecha] && espaciosPorFecha[fecha][cuadrilla]) {
             delete espaciosPorFecha[fecha][cuadrilla];
             if (window.cuadrillasManuales && window.cuadrillasManuales[fecha]) { delete window.cuadrillasManuales[fecha][cuadrilla]; }
@@ -1145,6 +1151,7 @@
     function abrirModalNuevo(cuadrilla, espacio) {
       document.getElementById('formularioAgenda').reset();
       const contenedorBadge = document.getElementById('contenedor_estado_wisphub'); if(contenedorBadge) contenedorBadge.classList.add('hidden');
+      
       document.getElementById('form_rownum').value = '';
       document.getElementById('form_fecha').value = document.getElementById('filtroFecha').value;
       document.getElementById('form_cuadrilla').value = cuadrilla;
@@ -1152,6 +1159,7 @@
       
       asegurarOpcionSelect('form_tecnico', cuadrilla);
       document.getElementById('form_tecnico').value = cuadrilla;
+      
       document.getElementById('modalTitulo').innerText = "Nuevo Registro - " + cuadrilla;
       document.getElementById('btnEliminarRegistro').classList.add('hidden');
       document.getElementById('btnDuplicarRegistro').classList.add('hidden'); 
@@ -1181,6 +1189,7 @@
              el.value = cita[c] || "";
          }
       });
+      
       document.getElementById('modalTitulo').innerText = "Editar Registro - " + cita.nombredelcliente;
       
       if(rolUsuario === 'admin') {
@@ -1206,6 +1215,7 @@
       }
 
       if (!confirm("¿Estás seguro de que deseas guardar este registro?")) return;
+      
       const rowNum = document.getElementById('form_rownum').value;
       const fecha = document.getElementById('form_fecha').value;
       
@@ -1213,6 +1223,7 @@
       let cuadrillaOriginal = document.getElementById('form_cuadrilla').value;
       if (!inputTecnico || inputTecnico.trim() === "") { inputTecnico = cuadrillaOriginal; }
       const tecnico = normalizarTecnico(inputTecnico);
+      
       let espacioFinal = document.getElementById('form_espacio').value;
       if (tecnico !== normalizarTecnico(cuadrillaOriginal)) {
           let esp = 1;
@@ -1237,6 +1248,7 @@
       datosPayload.fecha = fecha;
       datosPayload.tecnico = tecnico;
       datosPayload.espacio = espacioFinal;
+      
       if (rolUsuario === 'tecnico' && citaOriginal) {
           camposPermitidosTecnico.forEach(function(idCam) {
               let campoKey = idCam.replace('form_', '');
@@ -1287,6 +1299,7 @@
        if (!regexFecha.test(nuevaFecha.trim())) { alert("⚠️ Formato de fecha inválido. Por favor usa AAAA-MM-DD."); return; }
 
        if (!confirm("¿Estás seguro de que deseas duplicar este registro para el día " + nuevaFecha.trim() + "?")) return;
+       
        let citaOriginal = baseDatosGoogle.find(function(c) { return c.rowNum == rowNum; });
        if(!citaOriginal) return;
 
@@ -1299,6 +1312,7 @@
        const btn = document.getElementById('btnDuplicarRegistro');
        const textoOriginal = btn.innerHTML;
        btn.innerHTML = "⏳ Duplicando..."; btn.disabled = true;
+       
        if (typeof google !== 'undefined' && google.script && google.script.run) {
            google.script.run
              .withSuccessHandler(function(res) {
@@ -1319,6 +1333,7 @@
        const rowNum = document.getElementById('form_rownum').value;
        if(!rowNum) return;
        const usuario = safeSession.getItem('nombre_usuario') || safeSession.getItem('sesion_activa');
+       
        google.script.run
          .withSuccessHandler(function(res) {
             if(res.status === 'success') { cerrarModal(); sincronizarDatos(); } else alert("Error: " + res.message);
@@ -1360,7 +1375,8 @@
            if(valorAnterior) { 
                let existe = false;
                for(let i=0; i<el.options.length; i++) { if(el.options[i].value === valorAnterior) { existe = true; break; } }
-               if(!existe) { let opt = document.createElement('option'); opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
+               if(!existe) { let opt = document.createElement('option');
+               opt.value = valorAnterior; opt.innerText = valorAnterior; el.appendChild(opt); }
                el.value = valorAnterior;
            }
        }
@@ -1445,6 +1461,7 @@
     }
 
     let baseDatosCompletaAdmin = { headers: [], rows: [] };
+    
     function abrirVistaGeneralAdmin() {
       if (rolUsuario !== 'admin') return;
       document.getElementById('vistaAdminFiltros').classList.remove('hidden'); sincronizarVistaAdmin();
@@ -1470,8 +1487,10 @@
       const tbody = document.getElementById('tablaAdminBody');
       thead.innerHTML = ''; tbody.innerHTML = '';
       if (!baseDatosCompletaAdmin.headers || baseDatosCompletaAdmin.headers.length === 0) return;
+      
       const filaTitulos = document.createElement('tr'); const filaFiltros = document.createElement('tr');
       filaFiltros.className = "bg-slate-50 border-b border-indigo-100 shadow-sm";
+      
       baseDatosCompletaAdmin.headers.forEach((header, index) => {
         const th = document.createElement('th');
         th.className = "px-3 py-3 font-bold text-indigo-800 whitespace-nowrap uppercase tracking-wider border-b border-indigo-100 text-[11px] text-center";
@@ -1493,6 +1512,7 @@
         filaFiltros.appendChild(thFiltro);
       });
       thead.appendChild(filaTitulos); thead.appendChild(filaFiltros);
+      
       baseDatosCompletaAdmin.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr'); 
         tr.className = "hover:bg-indigo-50 transition-colors cursor-pointer"; 
@@ -1531,12 +1551,11 @@
           const filtro = filtrosActivos[index]; const cellValue = (row[index] || "").toString().toLowerCase().trim();
           if (filtro.tipo === 'fecha') {
             const cellDateStr = (row[index] || "").trim();
-       
              if (cellDateStr) { if (filtro.inicio && cellDateStr < filtro.inicio) { cumpleFiltros = false; break; } if (filtro.fin && cellDateStr > filtro.fin) { cumpleFiltros = false; break; } } 
             else if (filtro.inicio || filtro.fin) { cumpleFiltros = false; break; }
           } else {
             if (filtro.query) {
-               const esIgualDirecto = (cellValue === filtro.query);
+              const esIgualDirecto = (cellValue === filtro.query);
               if (!esIgualDirecto && filtro.regex && !filtro.regex.test(cellValue)) { cumpleFiltros = false; break; }
             }
           }
@@ -1561,6 +1580,7 @@
         const txtOrig = btn.innerHTML;
         btn.innerHTML = "⏳...";
         btn.disabled = true;
+        
         if (typeof google !== 'undefined' && google.script && google.script.run) {
             google.script.run
                 .withSuccessHandler(function(res) {
@@ -1570,7 +1590,7 @@
                         sincronizarDashboard();
                     } else {
                         alert("Error al guardar fechas: " + res.message);
-                     }
+                    }
                 })
                 .withFailureHandler(function(err) {
                     btn.innerHTML = txtOrig; btn.disabled = false;
@@ -1629,7 +1649,7 @@
                <div>
                  <div class="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4 text-2xl shadow-sm">
                    ${iconStr}
-                  </div>
+                 </div>
                  <h3 class="font-bold text-slate-800 text-lg leading-tight mb-2">${conf.titulo}</h3>
                  <p class="text-xs text-slate-500 mb-4">Haz clic para expandir la tabla detallada y visualizar la gráfica interactiva.</p>
                </div>
@@ -1653,6 +1673,7 @@
         
         let labelsForChart = [];
         let datasetsForChart = [];
+        
         if (conf.esColumnar) {
             let headers = Object.keys(rawData);
             let headTr = document.createElement('tr');
@@ -1695,6 +1716,7 @@
             let thCat = document.createElement('th');
             thCat.className = "px-4 py-3 font-bold uppercase tracking-wider text-xs"; 
             thCat.innerText = "Categoría"; headTr.appendChild(thCat);
+            
             for(let i=0; i<numVals; i++) {
                 let th = document.createElement('th');
                 th.className = "px-4 py-3 font-bold uppercase tracking-wider text-xs"; 
@@ -1702,6 +1724,7 @@
                 headTr.appendChild(th);
             }
             thead.appendChild(headTr);
+            
             keys.forEach(k => {
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors";
@@ -1717,6 +1740,7 @@
                 });
                 tbody.appendChild(tr);
            });
+           
             labelsForChart = keys;
             datasetsForChart.push({
                 label: "Valor Principal",
@@ -1724,7 +1748,8 @@
                 backgroundColor: '#4f46e5',
                 borderColor: '#3730a3',
                 borderWidth: 1
-             });
+            });
+            
             if (numVals > 1 && conf.tipo !== 'pie') {
                 datasetsForChart.push({
                     label: "Valor Secundario",
@@ -1738,11 +1763,12 @@
 
         renderCanvasChart(conf.tipo, labelsForChart, datasetsForChart);
         document.getElementById('modalDetalleDashboard').classList.remove('hidden');
-        }
+    }
 
     function renderCanvasChart(type, labels, datasets) {
         if (chartInstance) { chartInstance.destroy(); }
         const ctx = document.getElementById('dashModalCanvas').getContext('2d');
+        
         if (type === 'pie') {
             const pieColors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#64748b'];
             datasets[0].backgroundColor = pieColors.slice(0, labels.length);
@@ -1755,7 +1781,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                 plugins: {
+                plugins: {
                     legend: { position: type === 'pie' ? 'right' : 'top' },
                     tooltip: {
                         callbacks: {
@@ -1765,12 +1791,12 @@
                                 if (context.parsed.y !== null) { label += context.parsed.y; }
                                 return label;
                             }
-                         }
+                        }
                     }
                 }
             }
         });
-        }
+    }
 
     function cerrarModalDashboard() { document.getElementById('modalDetalleDashboard').classList.add('hidden'); }
 
