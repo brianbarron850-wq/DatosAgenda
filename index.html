@@ -1099,6 +1099,7 @@
                   let linkHtml = cita.linkCliente ? '<a href="' + realLink + '" target="_blank" onclick="event.stopPropagation()" class="text-indigo-600 hover:text-indigo-800 underline text-[11px] font-bold break-all truncate block mt-1">🔗 Enlace del cliente</a>' : '';
                   let extrasHtml = '';
                   if (cita.bienvenida) extrasHtml += '<div class="text-[10.5px] text-slate-600 mt-1">👋 Bienvenida: <span class="font-bold">' + cita.bienvenida + '</span></div>';
+                  if (cita.monto) extrasHtml += '<div class="text-[10.5px] text-slate-600 mt-1">Monto: <span class="font-bold">' + cita.monto + '</span></div>';
                   if (cita.pormediosediocuentadenosotros) {
                       let medioTexto = cita.pormediosediocuentadenosotros;
                       if (cita.otroscual) medioTexto += ' (' + cita.otroscual + ')';
